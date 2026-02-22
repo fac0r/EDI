@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EdiPsico — Acceso</title>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;600;700;900&family=Barlow+Condensed:wght@700;900&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --naranja:        #E8560A;
+            --naranja-oscuro: #C44508;
+            --naranja-claro:  #FF6B1A;
+            --azul:           #1E2A6E;
+            --azul-oscuro:    #141C4E;
+            --gris-fondo:     #F0F0F0;
+            --gris-borde:     #D8D8D8;
+            --blanco:         #FFFFFF;
+            --texto-suave:    #6B7280;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: 'Barlow', sans-serif;
+            background-color: var(--gris-fondo);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+
+        /* ── Panel izquierdo ── */
+        .panel-izq {
+            background: var(--azul);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 60px 64px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .panel-izq::before {
+            content: '';
+            position: absolute;
+            width: 500px; height: 500px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(232,86,10,0.18) 0%, transparent 70%);
+            top: -100px; right: -150px;
+        }
+
+        .panel-izq::after {
+            content: '';
+            position: absolute;
+            width: 300px; height: 300px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(232,86,10,0.12) 0%, transparent 70%);
+            bottom: -80px; left: -80px;
+        }
+
+        .logo-wrap {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 56px;
+            position: relative; z-index: 1;
+        }
+
+        .logo-icon {
+            width: 54px; height: 54px;
+            background: var(--naranja);
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 900;
+            font-size: 22px;
+            color: white;
+            letter-spacing: -1px;
+            box-shadow: 0 4px 20px rgba(232,86,10,0.4);
+        }
+
+        .logo-texto {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 900;
+            font-size: 28px;
+            color: white;
+            letter-spacing: 1px;
+        }
+
+        .logo-texto span { color: var(--naranja-claro); }
+
+        .hero-titulo {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 900;
+            font-size: clamp(36px, 4vw, 52px);
+            line-height: 1.05;
+            color: white;
+            margin-bottom: 20px;
+            position: relative; z-index: 1;
+        }
+
+        .hero-titulo .acento {
+            color: var(--naranja-claro);
+            display: block;
+        }
+
+        .hero-subtitulo {
+            font-size: 16px;
+            color: rgba(255,255,255,0.65);
+            line-height: 1.6;
+            max-width: 340px;
+            position: relative; z-index: 1;
+            margin-bottom: 48px;
+        }
+
+        .badge-uba {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 100px;
+            padding: 8px 16px;
+            position: relative; z-index: 1;
+        }
+
+        .badge-uba .dot {
+            width: 8px; height: 8px;
+            background: var(--naranja);
+            border-radius: 50%;
+            animation: pulso 2s infinite;
+        }
+
+        @keyframes pulso {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(0.85); }
+        }
+
+        .badge-uba span {
+            font-size: 13px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.75);
+            letter-spacing: 0.5px;
+        }
+
+        .lineas {
+            position: absolute;
+            bottom: 40px; right: 40px;
+            display: flex; gap: 6px;
+            z-index: 1;
+        }
+        .lineas div {
+            width: 3px;
+            background: var(--naranja);
+            border-radius: 2px;
+            opacity: 0.4;
+        }
+        .lineas div:nth-child(1) { height: 40px; }
+        .lineas div:nth-child(2) { height: 60px; opacity: 0.6; }
+        .lineas div:nth-child(3) { height: 30px; }
+        .lineas div:nth-child(4) { height: 70px; opacity: 0.8; }
+        .lineas div:nth-child(5) { height: 45px; opacity: 0.5; }
+
+        /* ── Panel derecho ── */
+        .panel-der {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 60px 64px;
+            background: var(--gris-fondo);
+        }
+
+        .form-card {
+            width: 100%;
+            max-width: 400px;
+            animation: slideUp 0.5s ease both;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-header { margin-bottom: 36px; }
+
+        .form-header h2 {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 900;
+            font-size: 32px;
+            color: var(--azul);
+            margin-bottom: 6px;
+        }
+
+        .form-header p {
+            font-size: 14px;
+            color: var(--texto-suave);
+        }
+
+        .campo { margin-bottom: 20px; }
+
+        .campo label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--azul);
+            margin-bottom: 8px;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+        }
+
+        .campo input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid var(--gris-borde);
+            border-radius: 10px;
+            font-family: 'Barlow', sans-serif;
+            font-size: 15px;
+            color: var(--azul-oscuro);
+            background: var(--blanco);
+            transition: border-color 0.2s, box-shadow 0.2s;
+            outline: none;
+        }
+
+        .campo input:focus {
+            border-color: var(--naranja);
+            box-shadow: 0 0 0 4px rgba(232,86,10,0.1);
+        }
+
+        .campo input::placeholder { color: #B0B8C4; }
+
+        .campo-password { position: relative; }
+        .campo-password input { padding-right: 48px; }
+
+        .toggle-pass {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--texto-suave);
+            font-size: 18px;
+            padding: 4px;
+            transition: color 0.2s;
+        }
+        .toggle-pass:hover { color: var(--naranja); }
+
+        .btn-login {
+            width: 100%;
+            padding: 15px;
+            background: var(--naranja);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 700;
+            font-size: 18px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+            box-shadow: 0 4px 16px rgba(232,86,10,0.3);
+        }
+
+        .btn-login:hover {
+            background: var(--naranja-oscuro);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(232,86,10,0.4);
+        }
+
+        .btn-login:active { transform: translateY(0); }
+
+        .btn-login:disabled {
+            background: #ccc;
+            box-shadow: none;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-msg {
+            display: none;
+            background: #FEE2E2;
+            border: 1px solid #FCA5A5;
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 14px;
+            color: #DC2626;
+            margin-top: 16px;
+            text-align: center;
+        }
+
+        .error-msg.visible { display: block; }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 28px 0 20px;
+        }
+
+        .divider hr {
+            flex: 1;
+            border: none;
+            border-top: 1px solid var(--gris-borde);
+        }
+
+        .divider span {
+            font-size: 12px;
+            color: var(--texto-suave);
+            white-space: nowrap;
+        }
+
+        .footer-form {
+            text-align: center;
+            font-size: 13px;
+            color: var(--texto-suave);
+            margin-top: 24px;
+        }
+
+        .footer-form strong { color: var(--azul); }
+
+        .spinner {
+            display: inline-block;
+            width: 18px; height: 18px;
+            border: 2px solid rgba(255,255,255,0.4);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── MOBILE: mostrar solo formulario ── */
+        @media (max-width: 768px) {
+            body {
+                grid-template-columns: 1fr;
+                background: var(--azul);
+            }
+
+            .panel-izq { display: none; }
+
+            .panel-der {
+                min-height: 100vh;
+                padding: 0;
+                background: transparent;
+                justify-content: flex-start;
+            }
+
+            .form-card {
+                background: var(--blanco);
+                border-radius: 0 0 24px 24px;
+                padding: 0;
+                max-width: 100%;
+                animation: none;
+            }
+
+            /* Header móvil con branding */
+            .form-card::before {
+                content: '';
+                display: block;
+                background: var(--azul);
+                padding: 40px 28px 32px;
+            }
+
+            .mobile-header {
+                background: var(--azul);
+                padding: 40px 28px 32px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 12px;
+                border-radius: 0 0 28px 28px;
+            }
+
+            .mobile-logo {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .mobile-logo-icon {
+                width: 48px; height: 48px;
+                background: var(--naranja);
+                border-radius: 12px;
+                display: flex; align-items: center; justify-content: center;
+                font-family: 'Barlow Condensed', sans-serif;
+                font-weight: 900; font-size: 20px;
+                color: white;
+                box-shadow: 0 4px 16px rgba(232,86,10,0.4);
+            }
+
+            .mobile-logo-texto {
+                font-family: 'Barlow Condensed', sans-serif;
+                font-weight: 900; font-size: 26px;
+                color: white; letter-spacing: 1px;
+            }
+
+            .mobile-logo-texto span { color: var(--naranja-claro); }
+
+            .mobile-subtitulo {
+                font-size: 13px;
+                color: rgba(255,255,255,0.6);
+                text-align: center;
+            }
+
+            .form-inner {
+                padding: 32px 24px 40px;
+            }
+
+            .form-header h2 { font-size: 26px; }
+        }
+
+        /* Ocultar mobile-header en desktop */
+        .mobile-header { display: none; }
+
+        @media (max-width: 768px) {
+            .mobile-header { display: flex; }
+            .form-header { margin-bottom: 24px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Panel izquierdo (solo desktop) -->
+<div class="panel-izq">
+    <div class="logo-wrap">
+        <div class="logo-icon">EP</div>
+        <div class="logo-texto">EDI <span>PSICO</span></div>
+    </div>
+
+
+    <div class="badge-uba">
+        <div class="dot"></div>
+        <span>UBA · Psicología · CEP</span>
+    </div>
+    <div class="lineas">
+        <div></div><div></div><div></div><div></div><div></div>
+    </div>
+</div>
+
+<!-- Panel derecho -->
+<div class="panel-der">
+    <div class="form-card">
+
+        <!-- Header móvil -->
+        <div class="mobile-header">
+            <div class="mobile-logo">
+                <div class="mobile-logo-icon">EP</div>
+                <div class="mobile-logo-texto">EDI <span>PSICO</span></div>
+            </div>
+            <div class="mobile-subtitulo">Sistema de Gestión Clínica · UBA Psicología</div>
+        </div>
+
+        <!-- Formulario -->
+        <div class="form-inner" style="padding: 0;">
+            <div style="padding: 32px 28px 40px;" id="form-contenido">
+                <div class="form-header">
+                    <h2>Bienvenido/a</h2>
+                    <p>Ingresá tus credenciales para acceder al sistema</p>
+                </div>
+
+                <div class="campo">
+                    <label for="email">Correo electrónico</label>
+                    <input type="email" id="email" placeholder="tu@email.com" autocomplete="email">
+                </div>
+
+                <div class="campo">
+                    <label for="password">Contraseña</label>
+                    <div class="campo-password">
+                        <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
+                        <button class="toggle-pass" onclick="togglePassword()" type="button">👁</button>
+                    </div>
+                </div>
+
+                <button class="btn-login" id="btnLogin" onclick="login()">
+                    Ingresar
+                </button>
+
+                <div class="error-msg" id="errorMsg"></div>
+
+                <div class="divider">
+                    <hr><span>Sistema interno · Acceso restringido</span><hr>
+                </div>
+
+                <div class="footer-form">
+                    ¿Problemas para acceder? Contactá al <strong>administrador del sistema</strong>.
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    function togglePassword() {
+        const input = document.getElementById('password');
+        input.type = input.type === 'password' ? 'text' : 'password';
+    }
+
+    async function login() {
+        const email    = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        const btn      = document.getElementById('btnLogin');
+        const errorMsg = document.getElementById('errorMsg');
+
+        if (!email || !password) {
+            errorMsg.textContent = 'Por favor completá todos los campos.';
+            errorMsg.classList.add('visible');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span>Ingresando...';
+        errorMsg.classList.remove('visible');
+
+        try {
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('rol', data.rol);
+                localStorage.setItem('nombre', data.nombre);
+                localStorage.setItem('apellido', data.apellido);
+                window.location.href = '/dashboard.html';
+            } else {
+                errorMsg.textContent = data.error || 'Credenciales inválidas.';
+                errorMsg.classList.add('visible');
+            }
+
+        } catch (error) {
+            errorMsg.textContent = 'Error de conexión. Verificá que el servidor esté activo.';
+            errorMsg.classList.add('visible');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = 'Ingresar';
+        }
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') login();
+    });
+</script>
+
+</body>
+</html>

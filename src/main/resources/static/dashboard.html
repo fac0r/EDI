@@ -1,0 +1,1394 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EdiPsico — Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;900&family=Barlow+Condensed:wght@700;900&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --naranja:        #E8560A;
+            --naranja-oscuro: #C44508;
+            --naranja-claro:  #FF6B1A;
+            --azul:           #1E2A6E;
+            --azul-oscuro:    #141C4E;
+            --gris-fondo:     #F0F0F0;
+            --gris-borde:     #D8D8D8;
+            --blanco:         #FFFFFF;
+            --texto-suave:    #6B7280;
+            --verde:          #10B981;
+            --rojo:           #EF4444;
+        }
+
+        body {
+            font-family: 'Barlow', sans-serif;
+            background: var(--gris-fondo);
+            min-height: 100vh;
+        }
+
+        /* ── NAVBAR ── */
+        .navbar {
+            background: var(--azul);
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .hamburger {
+            background: none;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            padding: 6px;
+            border-radius: 8px;
+            transition: background 0.2s;
+            flex-shrink: 0;
+        }
+        .hamburger:hover { background: rgba(255,255,255,0.1); }
+        .hamburger span {
+            display: block;
+            width: 22px; height: 2px;
+            background: white;
+            border-radius: 2px;
+            transition: all 0.3s;
+        }
+        .hamburger.active span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+        .hamburger.active span:nth-child(2) { opacity: 0; }
+        .hamburger.active span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+        .nav-logo-icon {
+            width: 32px; height: 32px;
+            background: var(--naranja);
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 900; font-size: 13px;
+            color: white;
+            flex-shrink: 0;
+        }
+        .nav-logo-texto {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 900; font-size: 18px;
+            color: white; letter-spacing: 1px;
+        }
+        .nav-logo-texto span { color: var(--naranja-claro); }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-avatar {
+            width: 34px; height: 34px;
+            background: var(--naranja);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 13px;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .nav-user-info {
+            text-align: right;
+        }
+
+        .nav-user-nombre {
+            font-size: 13px;
+            font-weight: 600;
+            color: white;
+            line-height: 1.2;
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .nav-user-rol {
+            font-size: 10px;
+            color: rgba(255,255,255,0.6);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-user-rol.supervisor { color: var(--naranja-claro); }
+
+        .btn-logout {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-family: 'Barlow', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+        .btn-logout:hover { background: rgba(255,255,255,0.2); }
+
+        /* ── SIDEBAR ── */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 90;
+        }
+        .sidebar-overlay.visible { display: block; }
+
+        .sidebar {
+            position: fixed;
+            top: 60px; left: 0;
+            width: 260px;
+            height: calc(100vh - 60px);
+            background: var(--azul-oscuro);
+            z-index: 95;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            padding: 20px 0;
+            overflow-y: auto;
+        }
+        .sidebar.open { transform: translateX(0); }
+
+        .sidebar-section {
+            padding: 0 12px;
+            margin-bottom: 8px;
+        }
+
+        .sidebar-section-title {
+            font-size: 10px;
+            font-weight: 700;
+            color: rgba(255,255,255,0.35);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 0 8px;
+            margin-bottom: 4px;
+        }
+
+        .sidebar-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            padding: 11px 12px;
+            background: none;
+            border: none;
+            border-radius: 10px;
+            color: rgba(255,255,255,0.7);
+            font-family: 'Barlow', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+            margin-bottom: 2px;
+        }
+        .sidebar-btn:hover { background: rgba(255,255,255,0.08); color: white; }
+        .sidebar-btn.active { background: var(--naranja); color: white; }
+        .sidebar-btn .icon { font-size: 17px; width: 22px; text-align: center; flex-shrink: 0; }
+
+        /* ── MAIN ── */
+        .main {
+            padding: 24px 16px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .page-titulo {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 900;
+            font-size: 26px;
+            color: var(--azul);
+            margin-bottom: 4px;
+        }
+
+        .page-subtitulo {
+            font-size: 13px;
+            color: var(--texto-suave);
+            margin-bottom: 20px;
+        }
+
+        .seccion { display: none; }
+        .seccion.activa { display: block; }
+
+        /* ── ACCIONES ── */
+        .barra-acciones {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .input-busqueda {
+            flex: 1;
+            min-width: 160px;
+            padding: 10px 14px;
+            border: 2px solid var(--gris-borde);
+            border-radius: 10px;
+            font-family: 'Barlow', sans-serif;
+            font-size: 14px;
+            color: var(--azul-oscuro);
+            background: var(--blanco);
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .input-busqueda:focus { border-color: var(--naranja); }
+
+        .btn-primario {
+            padding: 10px 18px;
+            background: var(--naranja);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 700;
+            font-size: 15px;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.15s;
+            white-space: nowrap;
+        }
+        .btn-primario:hover { background: var(--naranja-oscuro); transform: translateY(-1px); }
+
+        .btn-secundario {
+            padding: 10px 18px;
+            background: var(--blanco);
+            color: var(--azul);
+            border: 2px solid var(--gris-borde);
+            border-radius: 10px;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .btn-secundario:hover { border-color: var(--naranja); color: var(--naranja); }
+
+        /* ── TABLA ── */
+        .tabla-wrap {
+            background: var(--blanco);
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 400px;
+        }
+
+        thead { background: var(--azul); }
+
+        thead th {
+            padding: 12px 14px;
+            text-align: left;
+            font-size: 11px;
+            font-weight: 700;
+            color: rgba(255,255,255,0.8);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            white-space: nowrap;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid var(--gris-borde);
+            transition: background 0.15s;
+        }
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr:hover { background: #FFF5F0; }
+
+        tbody td {
+            padding: 12px 14px;
+            font-size: 14px;
+            color: #374151;
+        }
+
+        .td-nombre { font-weight: 600; color: var(--azul); }
+
+        .btn-tabla {
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-family: 'Barlow', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+            margin-right: 3px;
+            margin-bottom: 2px;
+        }
+        .btn-ver { background: #EFF6FF; color: #1D4ED8; }
+        .btn-ver:hover { background: #DBEAFE; }
+        .btn-intervencion { background: #FFF7ED; color: var(--naranja); }
+        .btn-intervencion:hover { background: #FFEDD5; }
+        .btn-eliminar { background: #FEF2F2; color: var(--rojo); }
+        .btn-eliminar:hover { background: #FEE2E2; }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--texto-suave);
+        }
+        .empty-state .emoji { font-size: 36px; margin-bottom: 10px; }
+        .empty-state p { font-size: 14px; }
+
+        /* ── MODAL ── */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 200;
+            align-items: flex-end;
+            justify-content: center;
+            padding: 0;
+        }
+
+        .modal-overlay.visible { display: flex; }
+
+        .modal {
+            background: var(--blanco);
+            border-radius: 20px 20px 0 0;
+            padding: 24px 20px 36px;
+            width: 100%;
+            max-width: 600px;
+            max-height: 92vh;
+            overflow-y: auto;
+            animation: slideUpModal 0.3s ease both;
+        }
+
+        @keyframes slideUpModal {
+            from { transform: translateY(100%); }
+            to   { transform: translateY(0); }
+        }
+
+        /* Handle para cerrar en mobile */
+        .modal::before {
+            content: '';
+            display: block;
+            width: 40px; height: 4px;
+            background: var(--gris-borde);
+            border-radius: 2px;
+            margin: 0 auto 20px;
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .modal-titulo {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 900;
+            font-size: 22px;
+            color: var(--azul);
+        }
+
+        .modal-cerrar {
+            background: var(--gris-fondo);
+            border: none;
+            width: 32px; height: 32px;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            color: var(--texto-suave);
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        .modal-cerrar:hover { background: #FEE2E2; color: var(--rojo); }
+
+        .campo-modal { margin-bottom: 14px; }
+
+        .campo-modal label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--azul);
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .campo-modal input,
+        .campo-modal textarea,
+        .campo-modal select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid var(--gris-borde);
+            border-radius: 8px;
+            font-family: 'Barlow', sans-serif;
+            font-size: 15px;
+            color: var(--azul-oscuro);
+            outline: none;
+            transition: border-color 0.2s;
+            -webkit-appearance: none;
+        }
+        .campo-modal input:focus,
+        .campo-modal textarea:focus,
+        .campo-modal select:focus { border-color: var(--naranja); }
+        .campo-modal textarea { resize: vertical; min-height: 90px; }
+
+        .modal-fila { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+        .modal-footer {
+            display: flex;
+            gap: 10px;
+            justify-content: stretch;
+            margin-top: 20px;
+        }
+
+        .modal-footer .btn-secundario,
+        .modal-footer .btn-primario {
+            flex: 1;
+            text-align: center;
+            justify-content: center;
+        }
+
+        /* Badge */
+        .badge-rol {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 100px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .badge-supervisor { background: #FFF7ED; color: var(--naranja); border: 1px solid #FFEDD5; }
+        .badge-profesional { background: #EFF6FF; color: #1D4ED8; border: 1px solid #DBEAFE; }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: var(--azul);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            z-index: 300;
+            opacity: 0;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            max-width: calc(100vw - 32px);
+            text-align: center;
+        }
+        .toast.visible { transform: translateX(-50%) translateY(0); opacity: 1; }
+        .toast.exito { background: var(--verde); }
+        .toast.error { background: var(--rojo); }
+
+        /* Cards intervenciones */
+        .intervencion-card {
+            background: var(--blanco);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--naranja);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .intervencion-fecha {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--naranja);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+        .intervencion-texto {
+            font-size: 14px;
+            color: #374151;
+            line-height: 1.6;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: none;
+            border: none;
+            color: var(--naranja);
+            font-family: 'Barlow', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 16px;
+            padding: 0;
+        }
+        .back-btn:hover { text-decoration: underline; }
+
+        .historia-card {
+            background: var(--blanco);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .historia-card-titulo {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 900;
+            font-size: 17px;
+            color: var(--azul);
+            margin-bottom: 14px;
+        }
+        .historia-campo-titulo {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--texto-suave);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+        .historia-campo-valor {
+            font-size: 14px;
+            color: #374151;
+            line-height: 1.5;
+            margin-bottom: 14px;
+        }
+
+        /* ── RESPONSIVE DESKTOP ── */
+        @media (min-width: 768px) {
+            .navbar { height: 64px; padding: 0 24px; }
+            .nav-logo-icon { width: 36px; height: 36px; font-size: 14px; }
+            .nav-logo-texto { font-size: 20px; }
+            .nav-user-nombre { max-width: none; }
+
+            .sidebar { top: 64px; height: calc(100vh - 64px); }
+
+            .main { padding: 32px 24px; }
+
+            .modal-overlay {
+                align-items: center;
+                padding: 20px;
+            }
+
+            .modal {
+                border-radius: 16px;
+                padding: 32px;
+                max-width: 520px;
+                animation: modalIn 0.25s ease both;
+            }
+
+            @keyframes modalIn {
+                from { opacity: 0; transform: scale(0.95) translateY(10px); }
+                to   { opacity: 1; transform: scale(1) translateY(0); }
+            }
+
+            .modal::before { display: none; }
+
+            .toast {
+                left: auto;
+                right: 24px;
+                transform: translateY(80px);
+                bottom: 24px;
+            }
+            .toast.visible { transform: translateY(0); }
+        }
+
+        /* ── MOBILE ESPECÍFICO ── */
+        @media (max-width: 480px) {
+            .modal-fila { grid-template-columns: 1fr; }
+
+            /* En mobile ocultar columna teléfono de tabla */
+            .col-tel { display: none; }
+
+            .btn-tabla {
+                display: inline-block;
+                margin-bottom: 3px;
+            }
+
+            .nav-user-info { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+    <div class="nav-left">
+        <button class="hamburger" id="hamburger" onclick="toggleSidebar()">
+            <span></span><span></span><span></span>
+        </button>
+        <a class="nav-logo" href="#">
+            <div class="nav-logo-icon">EP</div>
+            <div class="nav-logo-texto">EDI <span>PSICO</span></div>
+        </a>
+    </div>
+    <div class="nav-right">
+        <div class="nav-user" style="display:flex;align-items:center;gap:8px;">
+            <div class="nav-user-info">
+                <div class="nav-user-nombre" id="navNombre">—</div>
+                <div class="nav-user-rol" id="navRol">—</div>
+            </div>
+            <div class="nav-avatar" id="navAvatar">?</div>
+        </div>
+        <button class="btn-logout" onclick="logout()">Salir</button>
+    </div>
+</nav>
+
+<!-- SIDEBAR OVERLAY -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">Pacientes</div>
+        <button class="sidebar-btn active" id="btn-mis-pacientes" onclick="mostrarSeccion('mis-pacientes')">
+            <span class="icon">👥</span> Mis Pacientes
+        </button>
+        <button class="sidebar-btn" onclick="abrirModalPaciente()">
+            <span class="icon">➕</span> Nuevo Paciente
+        </button>
+    </div>
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">Intervenciones</div>
+        <button class="sidebar-btn" id="btn-mis-intervenciones" onclick="mostrarSeccion('mis-intervenciones')">
+            <span class="icon">📋</span> Mis Intervenciones
+        </button>
+        <button class="sidebar-btn" onclick="abrirModalIntervencion()">
+            <span class="icon">➕</span> Nueva Intervención
+        </button>
+    </div>
+    <div class="sidebar-section" id="seccion-supervisor" style="display:none;">
+        <div class="sidebar-section-title">Supervisión</div>
+        <button class="sidebar-btn" id="btn-todos-pacientes" onclick="mostrarSeccion('todos-pacientes')">
+            <span class="icon">🗂️</span> Todos los Pacientes
+        </button>
+        <button class="sidebar-btn" id="btn-todos-profesionales" onclick="mostrarSeccion('todos-profesionales')">
+            <span class="icon">👨‍⚕️</span> Profesionales
+        </button>
+        <button class="sidebar-btn" onclick="abrirModalProfesional()">
+            <span class="icon">➕</span> Nuevo Profesional
+        </button>
+    </div>
+</div>
+
+<!-- MAIN -->
+<main class="main">
+
+    <!-- MIS PACIENTES -->
+    <div class="seccion activa" id="sec-mis-pacientes">
+        <div class="page-titulo">Mis Pacientes</div>
+        <div class="page-subtitulo">Pacientes asociados a tus intervenciones</div>
+        <div class="barra-acciones">
+            <input class="input-busqueda" type="text" placeholder="🔍 Buscar por nombre o DNI..." oninput="filtrarPacientes(this.value, 'tabla-mis-pacientes')">
+            <button class="btn-primario" onclick="abrirModalPaciente()">+ Nuevo</button>
+        </div>
+        <div class="tabla-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>DNI</th>
+                    <th class="col-tel">Teléfono</th>
+                    <th>Acciones</th>
+                </tr>
+                </thead>
+                <tbody id="tabla-mis-pacientes">
+                <tr><td colspan="4"><div class="empty-state"><div class="emoji">⏳</div><p>Cargando...</p></div></td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- MIS INTERVENCIONES -->
+    <div class="seccion" id="sec-mis-intervenciones">
+        <div class="page-titulo">Mis Intervenciones</div>
+        <div class="page-subtitulo">Registro de tus intervenciones clínicas</div>
+        <div class="barra-acciones">
+            <button class="btn-primario" onclick="abrirModalIntervencion()">+ Nueva Intervención</button>
+        </div>
+        <div id="lista-mis-intervenciones"></div>
+    </div>
+
+    <!-- DETALLE PACIENTE -->
+    <div class="seccion" id="sec-detalle-paciente">
+        <button class="back-btn" onclick="volverAntesDetalle()">← Volver</button>
+        <div class="page-titulo" id="detalle-nombre">Paciente</div>
+        <div class="page-subtitulo" id="detalle-info">—</div>
+
+        <div class="historia-card" id="historia-card">
+            <div class="historia-card-titulo">Historia Clínica</div>
+            <div class="historia-campo-titulo">Información de Acceso</div>
+            <div class="historia-campo-valor" id="hc-acceso">—</div>
+            <div class="historia-campo-titulo">Datos Sociodemográficos</div>
+            <div class="historia-campo-valor" id="hc-socio">—</div>
+            <div class="historia-campo-titulo">Historia Clínica</div>
+            <div class="historia-campo-valor" id="hc-historia">—</div>
+            <button class="btn-primario" onclick="abrirModalHistoria()" style="width:100%;margin-top:4px;">Editar Historia Clínica</button>
+        </div>
+
+        <div class="historia-card-titulo" style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:17px;color:var(--azul);margin-bottom:12px;">Intervenciones</div>
+        <div class="barra-acciones">
+            <button class="btn-primario" style="width:100%;" onclick="abrirModalIntervencion()">+ Nueva Intervención</button>
+        </div>
+        <div id="lista-intervenciones-paciente"></div>
+    </div>
+
+    <!-- TODOS LOS PACIENTES (SUPERVISOR) -->
+    <div class="seccion" id="sec-todos-pacientes">
+        <div class="page-titulo">Todos los Pacientes</div>
+        <div class="page-subtitulo">Vista completa — Supervisión</div>
+        <div class="barra-acciones">
+            <input class="input-busqueda" type="text" placeholder="🔍 Buscar por nombre o DNI..." oninput="filtrarPacientes(this.value, 'tabla-todos-pacientes')">
+        </div>
+        <div class="tabla-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>DNI</th>
+                    <th class="col-tel">Teléfono</th>
+                    <th>Acciones</th>
+                </tr>
+                </thead>
+                <tbody id="tabla-todos-pacientes">
+                <tr><td colspan="4"><div class="empty-state"><div class="emoji">⏳</div><p>Cargando...</p></div></td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- PROFESIONALES (SUPERVISOR) -->
+    <div class="seccion" id="sec-todos-profesionales">
+        <div class="page-titulo">Profesionales</div>
+        <div class="page-subtitulo">Gestión de profesionales del sistema</div>
+        <div class="barra-acciones">
+            <input class="input-busqueda" type="text" placeholder="🔍 Buscar..." oninput="filtrarProfesionales(this.value)">
+            <button class="btn-primario" onclick="abrirModalProfesional()">+ Nuevo</button>
+        </div>
+        <div class="tabla-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Matrícula</th>
+                    <th class="col-tel">Especialidad</th>
+                    <th>Rol</th>
+                    <th>Acc.</th>
+                </tr>
+                </thead>
+                <tbody id="tabla-profesionales">
+                <tr><td colspan="5"><div class="empty-state"><div class="emoji">⏳</div><p>Cargando...</p></div></td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</main>
+
+<!-- MODAL: NUEVO PACIENTE -->
+<div class="modal-overlay" id="modal-paciente">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-titulo">Nuevo Paciente</div>
+            <button class="modal-cerrar" onclick="cerrarModal('modal-paciente')">✕</button>
+        </div>
+        <div class="modal-fila">
+            <div class="campo-modal"><label>Nombre</label><input type="text" id="pac-nombre" placeholder="Juan"></div>
+            <div class="campo-modal"><label>Apellido</label><input type="text" id="pac-apellido" placeholder="Pérez"></div>
+        </div>
+        <div class="campo-modal"><label>DNI</label><input type="text" id="pac-dni" inputmode="numeric" placeholder="30123456"></div>
+        <div class="campo-modal"><label>Teléfono</label><input type="tel" id="pac-tel" placeholder="011-1234-5678"></div>
+        <div class="modal-fila">
+            <div class="campo-modal"><label>Barrio</label><input type="text" id="pac-barrio" placeholder="Palermo"></div>
+            <div class="campo-modal"><label>Calle</label><input type="text" id="pac-calle" placeholder="Av. Santa Fe"></div>
+        </div>
+        <div class="campo-modal"><label>Número de Casa</label><input type="text" id="pac-numero" inputmode="numeric" placeholder="1234"></div>
+        <div class="modal-footer">
+            <button class="btn-secundario" onclick="cerrarModal('modal-paciente')">Cancelar</button>
+            <button class="btn-primario" onclick="guardarPaciente()">Guardar</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: EDITAR PACIENTE -->
+<div class="modal-overlay" id="modal-editar-paciente">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-titulo">Editar Paciente</div>
+            <button class="modal-cerrar" onclick="cerrarModal('modal-editar-paciente')">✕</button>
+        </div>
+        <div class="modal-fila">
+            <div class="campo-modal"><label>Nombre</label><input type="text" id="edit-pac-nombre"></div>
+            <div class="campo-modal"><label>Apellido</label><input type="text" id="edit-pac-apellido"></div>
+        </div>
+        <div class="campo-modal"><label>DNI</label><input type="text" id="edit-pac-dni" inputmode="numeric"></div>
+        <div class="campo-modal"><label>Teléfono</label><input type="tel" id="edit-pac-tel"></div>
+        <div class="modal-fila">
+            <div class="campo-modal"><label>Barrio</label><input type="text" id="edit-pac-barrio"></div>
+            <div class="campo-modal"><label>Calle</label><input type="text" id="edit-pac-calle"></div>
+        </div>
+        <div class="campo-modal"><label>Número de Casa</label><input type="text" id="edit-pac-numero" inputmode="numeric"></div>
+        <div class="modal-footer">
+            <button class="btn-secundario" onclick="cerrarModal('modal-editar-paciente')">Cancelar</button>
+            <button class="btn-primario" onclick="actualizarPaciente()">Guardar</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: NUEVA INTERVENCIÓN -->
+<div class="modal-overlay" id="modal-intervencion">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-titulo">Nueva Intervención</div>
+            <button class="modal-cerrar" onclick="cerrarModal('modal-intervencion')">✕</button>
+        </div>
+        <div class="campo-modal">
+            <label>Paciente</label>
+            <select id="int-paciente"></select>
+        </div>
+        <div class="campo-modal">
+            <label>Fecha</label>
+            <input type="date" id="int-fecha">
+        </div>
+        <div class="campo-modal">
+            <label>Descripción de la Intervención</label>
+            <textarea id="int-descripcion" placeholder="Describí la intervención realizada..."></textarea>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secundario" onclick="cerrarModal('modal-intervencion')">Cancelar</button>
+            <button class="btn-primario" onclick="guardarIntervencion()">Guardar</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: HISTORIA CLÍNICA -->
+<div class="modal-overlay" id="modal-historia">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-titulo">Historia Clínica</div>
+            <button class="modal-cerrar" onclick="cerrarModal('modal-historia')">✕</button>
+        </div>
+        <div class="campo-modal">
+            <label>Información de Acceso</label>
+            <textarea id="hc-acceso-input" placeholder="¿Cómo llegó al servicio?"></textarea>
+        </div>
+        <div class="campo-modal">
+            <label>Datos Sociodemográficos</label>
+            <textarea id="hc-socio-input" placeholder="Edad, estado civil, ocupación..."></textarea>
+        </div>
+        <div class="campo-modal">
+            <label>Historia Clínica</label>
+            <textarea id="hc-historia-input" placeholder="Motivo de consulta, antecedentes..."></textarea>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secundario" onclick="cerrarModal('modal-historia')">Cancelar</button>
+            <button class="btn-primario" onclick="guardarHistoria()">Guardar</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: NUEVO PROFESIONAL -->
+<div class="modal-overlay" id="modal-profesional">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-titulo">Nuevo Profesional</div>
+            <button class="modal-cerrar" onclick="cerrarModal('modal-profesional')">✕</button>
+        </div>
+        <div class="modal-fila">
+            <div class="campo-modal"><label>Nombre</label><input type="text" id="prof-nombre"></div>
+            <div class="campo-modal"><label>Apellido</label><input type="text" id="prof-apellido"></div>
+        </div>
+        <div class="campo-modal"><label>Email</label><input type="email" id="prof-email" inputmode="email"></div>
+        <div class="campo-modal"><label>Contraseña</label><input type="password" id="prof-password"></div>
+        <div class="modal-fila">
+            <div class="campo-modal"><label>Matrícula</label><input type="text" id="prof-matricula"></div>
+            <div class="campo-modal"><label>Especialidad</label><input type="text" id="prof-especialidad"></div>
+        </div>
+        <div class="campo-modal"><label>Teléfono</label><input type="tel" id="prof-tel"></div>
+        <div class="campo-modal">
+            <label>Rol</label>
+            <select id="prof-rol">
+                <option value="PROFESIONAL">Profesional</option>
+                <option value="SUPERVISOR">Supervisor</option>
+            </select>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secundario" onclick="cerrarModal('modal-profesional')">Cancelar</button>
+            <button class="btn-primario" onclick="guardarProfesional()">Guardar</button>
+        </div>
+    </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+    let usuario = {};
+    let pacienteActualId = null;
+    let seccionAnterior = 'mis-pacientes';
+    let todosPacientes = [];
+    let todosProfesionales = [];
+    let pacienteEditandoId = null;
+
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = '/index.html';
+
+    const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
+    };
+
+    async function init() {
+        try {
+            const res = await fetch('/api/auth/me', { headers });
+            if (!res.ok) { logout(); return; }
+            usuario = await res.json();
+
+            document.getElementById('navNombre').textContent = usuario.nombre + ' ' + usuario.apellido;
+            document.getElementById('navRol').textContent = usuario.rol === 'SUPERVISOR' ? 'Supervisor' : 'Profesional';
+            document.getElementById('navRol').className = 'nav-user-rol ' + (usuario.rol === 'SUPERVISOR' ? 'supervisor' : '');
+            document.getElementById('navAvatar').textContent = usuario.nombre[0] + usuario.apellido[0];
+
+            if (usuario.rol === 'SUPERVISOR') {
+                document.getElementById('seccion-supervisor').style.display = 'block';
+            }
+
+            cargarMisPacientes();
+        } catch(e) { logout(); }
+    }
+
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const ham = document.getElementById('hamburger');
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('visible');
+        ham.classList.toggle('active');
+    }
+
+    function cerrarSidebar() {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.remove('visible');
+        document.getElementById('hamburger').classList.remove('active');
+    }
+
+    function mostrarSeccion(nombre) {
+        document.querySelectorAll('.seccion').forEach(s => s.classList.remove('activa'));
+        document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('sec-' + nombre).classList.add('activa');
+        const btn = document.getElementById('btn-' + nombre);
+        if (btn) btn.classList.add('active');
+        cerrarSidebar();
+
+        if (nombre === 'mis-pacientes') cargarMisPacientes();
+        if (nombre === 'mis-intervenciones') cargarMisIntervenciones();
+        if (nombre === 'todos-pacientes') cargarTodosPacientes();
+        if (nombre === 'todos-profesionales') cargarTodosProfesionales();
+    }
+
+    function mostrarDetallePaciente(pacienteId, desde) {
+        seccionAnterior = desde;
+        pacienteActualId = pacienteId;
+        document.querySelectorAll('.seccion').forEach(s => s.classList.remove('activa'));
+        document.getElementById('sec-detalle-paciente').classList.add('activa');
+        cerrarSidebar();
+        cargarDetallePaciente(pacienteId);
+    }
+
+    function volverAntesDetalle() {
+        mostrarSeccion(seccionAnterior);
+    }
+
+    async function cargarMisPacientes() {
+        let url = usuario.rol === 'SUPERVISOR'
+            ? '/api/pacientes'
+            : `/api/pacientes/mis-pacientes?profesionalId=${usuario.id}`;
+        const res = await fetch(url, { headers });
+        todosPacientes = await res.json();
+        renderizarPacientes(todosPacientes, 'tabla-mis-pacientes', 'mis-pacientes');
+    }
+
+    async function cargarTodosPacientes() {
+        const res = await fetch('/api/pacientes', { headers });
+        todosPacientes = await res.json();
+        renderizarPacientes(todosPacientes, 'tabla-todos-pacientes', 'todos-pacientes');
+    }
+
+    function renderizarPacientes(lista, tablaId, desde) {
+        const tbody = document.getElementById(tablaId);
+        if (!lista.length) {
+            tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><div class="emoji">👥</div><p>No hay pacientes registrados.</p></div></td></tr>`;
+            return;
+        }
+        tbody.innerHTML = lista.map(p => `
+            <tr>
+                <td class="td-nombre">${p.nombre} ${p.apellido}</td>
+                <td>${p.dni}</td>
+                <td class="col-tel">${p.telDeContacto || '—'}</td>
+                <td>
+                    <button class="btn-tabla btn-ver" onclick="mostrarDetallePaciente(${p.id}, '${desde}')">Ver</button>
+                    <button class="btn-tabla btn-intervencion" onclick="abrirModalEditarPaciente(${p.id})">Editar</button>
+                    ${usuario.rol === 'SUPERVISOR' ? `<button class="btn-tabla btn-eliminar" onclick="eliminarPaciente(${p.id})">Eliminar</button>` : ''}
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    async function eliminarPaciente(id) {
+        if (!confirm('¿Seguro que querés eliminar este paciente? Esta acción no se puede deshacer.')) return;
+        const res = await fetch(`/api/pacientes/${id}`, { method: 'DELETE', headers });
+        if (res.ok) {
+            mostrarToast('Paciente eliminado', 'exito');
+            cargarMisPacientes();
+            cargarTodosPacientes();
+        } else {
+            mostrarToast('Error al eliminar el paciente', 'error');
+        }
+    }
+
+    async function cargarMisIntervenciones() {
+        const res = await fetch(`/api/intervenciones/profesional/${usuario.id}`, { headers });
+        const lista = await res.json();
+        const contenedor = document.getElementById('lista-mis-intervenciones');
+        if (!lista.length) {
+            contenedor.innerHTML = `<div class="empty-state"><div class="emoji">📋</div><p>No tenés intervenciones registradas.</p></div>`;
+            return;
+        }
+        contenedor.innerHTML = lista.map(i => `
+            <div class="intervencion-card">
+                <div class="intervencion-fecha">${formatearFecha(i.fechaDeIntervencion)}</div>
+                <div class="intervencion-texto">${i.intervencion}</div>
+            </div>
+        `).join('');
+    }
+
+    async function cargarDetallePaciente(id) {
+        const resPac = await fetch(`/api/pacientes/${id}`, { headers });
+        const pac = await resPac.json();
+        document.getElementById('detalle-nombre').textContent = pac.nombre + ' ' + pac.apellido;
+        document.getElementById('detalle-info').textContent = `DNI: ${pac.dni} | Tel: ${pac.telDeContacto || '—'} | ${pac.barrio || ''} ${pac.calle || ''} ${pac.numeroDeCasa || ''}`;
+
+        // Profesionales asociados (solo SUPERVISOR)
+        if (usuario.rol === 'SUPERVISOR') {
+            const resProf = await fetch(`/api/pacientes/${id}/profesionales`, { headers });
+            const profs = await resProf.json();
+            const historiaCard = document.getElementById('historia-card');
+            const profCardExistente = document.getElementById('prof-asociados-card');
+            if (profCardExistente) profCardExistente.remove();
+
+            if (profs.length) {
+                const div = document.createElement('div');
+                div.id = 'prof-asociados-card';
+                div.className = 'historia-card';
+                div.style.marginBottom = '16px';
+                div.innerHTML = `
+                    <div class="historia-card-titulo">Profesionales Asociados</div>
+                    ${profs.map(p => `
+                        <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--gris-borde);">
+                            <div style="width:36px;height:36px;background:var(--naranja);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:white;flex-shrink:0;">
+                                ${p.nombre[0]}${p.apellido[0]}
+                            </div>
+                            <div>
+                                <div style="font-weight:600;color:var(--azul);font-size:14px;">${p.nombre} ${p.apellido}</div>
+                                <div style="font-size:12px;color:var(--texto-suave);">${p.especialidad} · Mat. ${p.matricula}</div>
+                            </div>
+                        </div>
+                    `).join('')}
+                `;
+                historiaCard.parentNode.insertBefore(div, historiaCard);
+            }
+        }
+
+        // Historia clínica
+        const resHC = await fetch(`/api/historias-clinicas/paciente/${id}`, { headers });
+        if (resHC.ok) {
+            const hc = await resHC.json();
+            document.getElementById('hc-acceso').textContent = hc.informacionDeAcceso || '—';
+            document.getElementById('hc-socio').textContent = hc.datosSociodemograficos || '—';
+            document.getElementById('hc-historia').textContent = hc.historiaClinica || '—';
+        } else {
+            document.getElementById('hc-acceso').textContent = 'Sin historia clínica cargada.';
+            document.getElementById('hc-socio').textContent = '—';
+            document.getElementById('hc-historia').textContent = '—';
+        }
+
+        // Intervenciones
+        const resInt = await fetch(`/api/intervenciones/paciente/${id}`, { headers });
+        const ints = await resInt.json();
+        const contenedor = document.getElementById('lista-intervenciones-paciente');
+        if (!ints.length) {
+            contenedor.innerHTML = `<div class="empty-state"><div class="emoji">📋</div><p>Sin intervenciones registradas.</p></div>`;
+        } else {
+            contenedor.innerHTML = ints.map(i => `
+                <div class="intervencion-card">
+                    <div class="intervencion-fecha">${formatearFecha(i.fechaDeIntervencion)}</div>
+                    <div class="intervencion-texto">${i.intervencion}</div>
+                </div>
+            `).join('');
+        }
+    }
+
+    async function cargarTodosProfesionales() {
+        const res = await fetch('/api/profesionales', { headers });
+        todosProfesionales = await res.json();
+        renderizarProfesionales(todosProfesionales);
+    }
+
+    function renderizarProfesionales(lista) {
+        const tbody = document.getElementById('tabla-profesionales');
+        if (!lista.length) {
+            tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="emoji">👨‍⚕️</div><p>No hay profesionales.</p></div></td></tr>`;
+            return;
+        }
+        tbody.innerHTML = lista.map(p => `
+            <tr>
+                <td class="td-nombre">${p.nombre} ${p.apellido}</td>
+                <td>${p.matricula || '—'}</td>
+                <td class="col-tel">${p.especialidad || '—'}</td>
+                <td><span class="badge-rol ${p.rol === 'SUPERVISOR' ? 'badge-supervisor' : 'badge-profesional'}">${p.rol}</span></td>
+                <td><button class="btn-tabla btn-eliminar" onclick="eliminarProfesional(${p.id})">Eliminar</button></td>
+            </tr>
+        `).join('');
+    }
+
+    function filtrarPacientes(query, tablaId) {
+        const q = query.toLowerCase();
+        const filtrados = todosPacientes.filter(p =>
+            (p.nombre + ' ' + p.apellido).toLowerCase().includes(q) || p.dni.includes(q)
+        );
+        const desde = tablaId === 'tabla-mis-pacientes' ? 'mis-pacientes' : 'todos-pacientes';
+        renderizarPacientes(filtrados, tablaId, desde);
+    }
+
+    function filtrarProfesionales(query) {
+        const q = query.toLowerCase();
+        const filtrados = todosProfesionales.filter(p =>
+            (p.nombre + ' ' + p.apellido).toLowerCase().includes(q) ||
+            (p.matricula || '').toLowerCase().includes(q)
+        );
+        renderizarProfesionales(filtrados);
+    }
+
+    function abrirModalPaciente() {
+        cerrarSidebar();
+        document.getElementById('modal-paciente').classList.add('visible');
+    }
+
+    async function abrirModalIntervencion() {
+        cerrarSidebar();
+        const select = document.getElementById('int-paciente');
+        let url = usuario.rol === 'SUPERVISOR'
+            ? '/api/pacientes'
+            : `/api/pacientes/mis-pacientes?profesionalId=${usuario.id}`;
+        const res = await fetch(url, { headers });
+        const pacs = await res.json();
+        select.innerHTML = pacs.map(p => `<option value="${p.id}">${p.nombre} ${p.apellido}</option>`).join('');
+        if (pacienteActualId) select.value = pacienteActualId;
+        document.getElementById('int-fecha').value = new Date().toISOString().split('T')[0];
+        document.getElementById('modal-intervencion').classList.add('visible');
+    }
+
+    function abrirModalHistoria() {
+        document.getElementById('hc-acceso-input').value = document.getElementById('hc-acceso').textContent !== '—' ? document.getElementById('hc-acceso').textContent : '';
+        document.getElementById('hc-socio-input').value = document.getElementById('hc-socio').textContent !== '—' ? document.getElementById('hc-socio').textContent : '';
+        document.getElementById('hc-historia-input').value = document.getElementById('hc-historia').textContent !== '—' ? document.getElementById('hc-historia').textContent : '';
+        document.getElementById('modal-historia').classList.add('visible');
+    }
+
+    function abrirModalProfesional() {
+        cerrarSidebar();
+        document.getElementById('modal-profesional').classList.add('visible');
+    }
+
+    async function abrirModalEditarPaciente(id) {
+        const res = await fetch(`/api/pacientes/${id}`, { headers });
+        if (!res.ok) { mostrarToast('Error al cargar el paciente', 'error'); return; }
+        const p = await res.json();
+        pacienteEditandoId = id;
+        document.getElementById('edit-pac-nombre').value = p.nombre || '';
+        document.getElementById('edit-pac-apellido').value = p.apellido || '';
+        document.getElementById('edit-pac-dni').value = p.dni || '';
+        document.getElementById('edit-pac-tel').value = p.telDeContacto || '';
+        document.getElementById('edit-pac-barrio').value = p.barrio || '';
+        document.getElementById('edit-pac-calle').value = p.calle || '';
+        document.getElementById('edit-pac-numero').value = p.numeroDeCasa || '';
+        document.getElementById('modal-editar-paciente').classList.add('visible');
+    }
+
+    function cerrarModal(id) {
+        document.getElementById(id).classList.remove('visible');
+    }
+
+    async function guardarPaciente() {
+        const body = {
+            nombre: document.getElementById('pac-nombre').value,
+            apellido: document.getElementById('pac-apellido').value,
+            dni: document.getElementById('pac-dni').value,
+            telDeContacto: document.getElementById('pac-tel').value,
+            barrio: document.getElementById('pac-barrio').value,
+            calle: document.getElementById('pac-calle').value,
+            numeroDeCasa: document.getElementById('pac-numero').value,
+        };
+
+        const res = await fetch('/api/pacientes', { method: 'POST', headers, body: JSON.stringify(body) });
+        if (res.ok) {
+            const pacienteCreado = await res.json();
+            const hoy = new Date().toISOString().split('T')[0];
+            await fetch(`/api/intervenciones/paciente/${pacienteCreado.id}/profesional/${usuario.id}`, {
+                method: 'POST', headers,
+                body: JSON.stringify({ fechaDeIntervencion: hoy, intervencion: 'Inicio' })
+            });
+            cerrarModal('modal-paciente');
+            mostrarToast('Paciente creado correctamente', 'exito');
+            ['pac-nombre','pac-apellido','pac-dni','pac-tel','pac-barrio','pac-calle','pac-numero']
+                .forEach(id => document.getElementById(id).value = '');
+            cargarMisPacientes();
+        } else {
+            mostrarToast('Error al guardar el paciente', 'error');
+        }
+    }
+
+    async function actualizarPaciente() {
+        const body = {
+            nombre: document.getElementById('edit-pac-nombre').value,
+            apellido: document.getElementById('edit-pac-apellido').value,
+            dni: document.getElementById('edit-pac-dni').value,
+            telDeContacto: document.getElementById('edit-pac-tel').value,
+            barrio: document.getElementById('edit-pac-barrio').value,
+            calle: document.getElementById('edit-pac-calle').value,
+            numeroDeCasa: document.getElementById('edit-pac-numero').value,
+        };
+        const res = await fetch(`/api/pacientes/${pacienteEditandoId}`, { method: 'PUT', headers, body: JSON.stringify(body) });
+        if (res.ok) {
+            cerrarModal('modal-editar-paciente');
+            mostrarToast('Paciente actualizado correctamente', 'exito');
+            cargarMisPacientes();
+            if (pacienteActualId === pacienteEditandoId) cargarDetallePaciente(pacienteEditandoId);
+        } else {
+            mostrarToast('Error al actualizar el paciente', 'error');
+        }
+    }
+
+    async function guardarIntervencion() {
+        const pacienteId = document.getElementById('int-paciente').value;
+        const body = {
+            fechaDeIntervencion: document.getElementById('int-fecha').value,
+            intervencion: document.getElementById('int-descripcion').value,
+        };
+        const res = await fetch(`/api/intervenciones/paciente/${pacienteId}/profesional/${usuario.id}`, { method: 'POST', headers, body: JSON.stringify(body) });
+        if (res.ok) {
+            cerrarModal('modal-intervencion');
+            mostrarToast('Intervención registrada correctamente', 'exito');
+            document.getElementById('int-descripcion').value = '';
+            if (pacienteActualId) cargarDetallePaciente(pacienteActualId);
+            else cargarMisIntervenciones();
+        } else {
+            mostrarToast('Error al guardar la intervención', 'error');
+        }
+    }
+
+    async function guardarHistoria() {
+        const body = {
+            informacionDeAcceso: document.getElementById('hc-acceso-input').value,
+            datosSociodemograficos: document.getElementById('hc-socio-input').value,
+            historiaClinica: document.getElementById('hc-historia-input').value,
+        };
+        let res = await fetch(`/api/historias-clinicas/paciente/${pacienteActualId}`, { method: 'PUT', headers, body: JSON.stringify(body) });
+        if (res.status === 404) {
+            res = await fetch(`/api/historias-clinicas/paciente/${pacienteActualId}`, { method: 'POST', headers, body: JSON.stringify(body) });
+        }
+        if (res.ok) {
+            cerrarModal('modal-historia');
+            mostrarToast('Historia clínica guardada', 'exito');
+            cargarDetallePaciente(pacienteActualId);
+        } else {
+            mostrarToast('Error al guardar la historia clínica', 'error');
+        }
+    }
+
+    async function guardarProfesional() {
+        const body = {
+            nombre: document.getElementById('prof-nombre').value,
+            apellido: document.getElementById('prof-apellido').value,
+            email: document.getElementById('prof-email').value,
+            password: document.getElementById('prof-password').value,
+            matricula: document.getElementById('prof-matricula').value,
+            especialidad: document.getElementById('prof-especialidad').value,
+            telDeContacto: document.getElementById('prof-tel').value,
+            rol: document.getElementById('prof-rol').value,
+        };
+        const res = await fetch('/api/profesionales', { method: 'POST', headers, body: JSON.stringify(body) });
+        if (res.ok) {
+            cerrarModal('modal-profesional');
+            mostrarToast('Profesional creado correctamente', 'exito');
+            cargarTodosProfesionales();
+        } else {
+            mostrarToast('Error al crear el profesional', 'error');
+        }
+    }
+
+    async function eliminarProfesional(id) {
+        if (!confirm('¿Seguro que querés eliminar este profesional?')) return;
+        const res = await fetch(`/api/profesionales/${id}`, { method: 'DELETE', headers });
+        if (res.ok) {
+            mostrarToast('Profesional eliminado', 'exito');
+            cargarTodosProfesionales();
+        } else {
+            mostrarToast('No se puede eliminar: tiene intervenciones asociadas', 'error');
+        }
+    }
+
+    function formatearFecha(fecha) {
+        if (!fecha) return '—';
+        const [y, m, d] = fecha.split('-');
+        return `${d}/${m}/${y}`;
+    }
+
+    function mostrarToast(msg, tipo = '') {
+        const toast = document.getElementById('toast');
+        toast.textContent = msg;
+        toast.className = 'toast ' + tipo + ' visible';
+        setTimeout(() => toast.classList.remove('visible'), 3000);
+    }
+
+    function logout() {
+        localStorage.clear();
+        window.location.href = '/index.html';
+    }
+
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.modal-overlay.visible').forEach(m => m.classList.remove('visible'));
+        }
+    });
+
+    init();
+</script>
+</body>
+</html>
