@@ -391,7 +391,6 @@
             to   { transform: translateY(0); }
         }
 
-        /* Handle para cerrar en mobile */
         .modal::before {
             content: '';
             display: block;
@@ -622,18 +621,13 @@
         /* ── MOBILE ESPECÍFICO ── */
         @media (max-width: 480px) {
             .modal-fila { grid-template-columns: 1fr; }
-
-            /* En mobile ocultar columna teléfono de tabla */
             .col-tel { display: none; }
-
-            .btn-tabla {
-                display: inline-block;
-                margin-bottom: 3px;
-            }
-
+            .btn-tabla { display: inline-block; margin-bottom: 3px; }
             .nav-user-info { display: none; }
         }
     </style>
+
+    <script src="https://unpkg.com/docx@8.2.3/build/index.umd.js"></script>
 </head>
 <body>
 
@@ -707,6 +701,8 @@
         <div class="barra-acciones">
             <input class="input-busqueda" type="text" placeholder="🔍 Buscar por nombre o DNI..." oninput="filtrarPacientes(this.value, 'tabla-mis-pacientes')">
             <button class="btn-primario" onclick="abrirModalPaciente()">+ Nuevo</button>
+            <button class="btn-secundario" onclick="descargarTodosDocx()">⬇ Exportar lista</button>
+
         </div>
         <div class="tabla-wrap">
             <table>
@@ -749,7 +745,10 @@
             <div class="historia-campo-valor" id="hc-socio">—</div>
             <div class="historia-campo-titulo">Historia Clínica</div>
             <div class="historia-campo-valor" id="hc-historia">—</div>
+            <!-- Campos extra de HC se insertan aquí dinámicamente -->
+            <div id="hc-campos-extra"></div>
             <button class="btn-primario" onclick="abrirModalHistoria()" style="width:100%;margin-top:4px;">Editar Historia Clínica</button>
+            <button class="btn-secundario" onclick="descargarPacienteDocx()" style="width:100%;margin-top:8px;">⬇ Descargar como Word</button>
         </div>
 
         <div class="historia-card-titulo" style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:17px;color:var(--azul);margin-bottom:12px;">Intervenciones</div>
@@ -765,6 +764,7 @@
         <div class="page-subtitulo">Vista completa — Supervisión</div>
         <div class="barra-acciones">
             <input class="input-busqueda" type="text" placeholder="🔍 Buscar por nombre o DNI..." oninput="filtrarPacientes(this.value, 'tabla-todos-pacientes')">
+            <button class="btn-secundario" onclick="descargarTodosDocx()">⬇ Exportar lista</button>
         </div>
         <div class="tabla-wrap">
             <table>
@@ -822,13 +822,45 @@
             <div class="campo-modal"><label>Nombre</label><input type="text" id="pac-nombre" placeholder="Juan"></div>
             <div class="campo-modal"><label>Apellido</label><input type="text" id="pac-apellido" placeholder="Pérez"></div>
         </div>
-        <div class="campo-modal"><label>DNI</label><input type="text" id="pac-dni" inputmode="numeric" placeholder="30123456"></div>
+        <div class="modal-fila">
+            <div class="campo-modal"><label>DNI</label><input type="text" id="pac-dni" inputmode="numeric" placeholder="30123456"></div>
+            <div class="campo-modal"><label>Edad</label><input type="number" id="pac-edad" inputmode="numeric" placeholder="30" min="0" max="120"></div>
+        </div>
+        <div class="campo-modal"><label>Nacionalidad</label><input type="text" id="pac-nacionalidad" placeholder="Argentina"></div>
         <div class="campo-modal"><label>Teléfono</label><input type="tel" id="pac-tel" placeholder="011-1234-5678"></div>
         <div class="modal-fila">
+            <div class="campo-modal"><label>Localidad</label><input type="text" id="pac-localidad" placeholder="Buenos Aires"></div>
             <div class="campo-modal"><label>Barrio</label><input type="text" id="pac-barrio" placeholder="Palermo"></div>
-            <div class="campo-modal"><label>Calle</label><input type="text" id="pac-calle" placeholder="Av. Santa Fe"></div>
         </div>
-        <div class="campo-modal"><label>Número de Casa</label><input type="text" id="pac-numero" inputmode="numeric" placeholder="1234"></div>
+        <div class="modal-fila">
+            <div class="campo-modal"><label>Calle</label><input type="text" id="pac-calle" placeholder="Av. Santa Fe"></div>
+            <div class="campo-modal"><label>Número de Casa</label><input type="text" id="pac-numero" inputmode="numeric" placeholder="1234"></div>
+        </div>
+        <div class="modal-fila">
+            <div class="campo-modal">
+                <label>Estado Civil</label>
+                <select id="pac-estado-civil">
+                    <option value="">— Seleccionar —</option>
+                    <option value="Soltero/a">Soltero/a</option>
+                    <option value="Casado/a">Casado/a</option>
+                    <option value="Divorciado/a">Divorciado/a</option>
+                    <option value="Viudo/a">Viudo/a</option>
+                    <option value="Unión convivencial">Unión convivencial</option>
+                </select>
+            </div>
+            <div class="campo-modal"><label>Número de Hijos</label><input type="number" id="pac-hijos" inputmode="numeric" placeholder="0" min="0"></div>
+        </div>
+        <div class="modal-fila">
+            <div class="campo-modal">
+                <label>¿Trabaja?</label>
+                <select id="pac-trabaja">
+                    <option value="">— Seleccionar —</option>
+                    <option value="Si">Sí</option>
+                    <option value="No">No</option>
+                </select>
+            </div>
+            <div class="campo-modal"><label>Ocupación</label><input type="text" id="pac-ocupacion" placeholder="Docente"></div>
+        </div>
         <div class="modal-footer">
             <button class="btn-secundario" onclick="cerrarModal('modal-paciente')">Cancelar</button>
             <button class="btn-primario" onclick="guardarPaciente()">Guardar</button>
@@ -847,13 +879,45 @@
             <div class="campo-modal"><label>Nombre</label><input type="text" id="edit-pac-nombre"></div>
             <div class="campo-modal"><label>Apellido</label><input type="text" id="edit-pac-apellido"></div>
         </div>
-        <div class="campo-modal"><label>DNI</label><input type="text" id="edit-pac-dni" inputmode="numeric"></div>
+        <div class="modal-fila">
+            <div class="campo-modal"><label>DNI</label><input type="text" id="edit-pac-dni" inputmode="numeric"></div>
+            <div class="campo-modal"><label>Edad</label><input type="number" id="edit-pac-edad" inputmode="numeric" min="0" max="120"></div>
+        </div>
+        <div class="campo-modal"><label>Nacionalidad</label><input type="text" id="edit-pac-nacionalidad"></div>
         <div class="campo-modal"><label>Teléfono</label><input type="tel" id="edit-pac-tel"></div>
         <div class="modal-fila">
+            <div class="campo-modal"><label>Localidad</label><input type="text" id="edit-pac-localidad"></div>
             <div class="campo-modal"><label>Barrio</label><input type="text" id="edit-pac-barrio"></div>
-            <div class="campo-modal"><label>Calle</label><input type="text" id="edit-pac-calle"></div>
         </div>
-        <div class="campo-modal"><label>Número de Casa</label><input type="text" id="edit-pac-numero" inputmode="numeric"></div>
+        <div class="modal-fila">
+            <div class="campo-modal"><label>Calle</label><input type="text" id="edit-pac-calle"></div>
+            <div class="campo-modal"><label>Número de Casa</label><input type="text" id="edit-pac-numero" inputmode="numeric"></div>
+        </div>
+        <div class="modal-fila">
+            <div class="campo-modal">
+                <label>Estado Civil</label>
+                <select id="edit-pac-estado-civil">
+                    <option value="">— Seleccionar —</option>
+                    <option value="Soltero/a">Soltero/a</option>
+                    <option value="Casado/a">Casado/a</option>
+                    <option value="Divorciado/a">Divorciado/a</option>
+                    <option value="Viudo/a">Viudo/a</option>
+                    <option value="Unión convivencial">Unión convivencial</option>
+                </select>
+            </div>
+            <div class="campo-modal"><label>Número de Hijos</label><input type="number" id="edit-pac-hijos" inputmode="numeric" min="0"></div>
+        </div>
+        <div class="modal-fila">
+            <div class="campo-modal">
+                <label>¿Trabaja?</label>
+                <select id="edit-pac-trabaja">
+                    <option value="">— Seleccionar —</option>
+                    <option value="Si">Sí</option>
+                    <option value="No">No</option>
+                </select>
+            </div>
+            <div class="campo-modal"><label>Ocupación</label><input type="text" id="edit-pac-ocupacion"></div>
+        </div>
         <div class="modal-footer">
             <button class="btn-secundario" onclick="cerrarModal('modal-editar-paciente')">Cancelar</button>
             <button class="btn-primario" onclick="actualizarPaciente()">Guardar</button>
@@ -906,6 +970,67 @@
             <label>Historia Clínica</label>
             <textarea id="hc-historia-input" placeholder="Motivo de consulta, antecedentes..."></textarea>
         </div>
+        <div class="campo-modal">
+            <label>Obra Social</label>
+            <input type="text" id="hc-obra-social" placeholder="OSDE, PAMI, sin obra social...">
+        </div>
+        <div class="campo-modal">
+            <label>¿Percibe algún plan de asistencia social?</label>
+            <select id="hc-plan-social">
+                <option value="">— Seleccionar —</option>
+                <option value="Si">Sí</option>
+                <option value="No">No</option>
+            </select>
+        </div>
+        <div class="campo-modal">
+            <label>Situación Laboral</label>
+            <select id="hc-situacion-laboral">
+                <option value="">— Seleccionar —</option>
+                <option value="EN_RELACION_DE_DEPENDENCIA">En relación de dependencia</option>
+                <option value="MONOTRIBUTISTA">Monotributista</option>
+                <option value="TRABAJO_INFORMAL">Trabajo informal</option>
+            </select>
+        </div>
+        <div class="campo-modal">
+            <label>Nivel de Educación</label>
+            <select id="hc-nivel-educacion">
+                <option value="">— Seleccionar —</option>
+                <option value="PRIMARIO_INCOMPLETO">Primario Incompleto</option>
+                <option value="PRIMARIO_COMPLETO">Primario Completo</option>
+                <option value="SECUNDARIO_INCOMPLETO">Secundario Incompleto</option>
+                <option value="SECUNDARIO_COMPLETO">Secundario Completo</option>
+                <option value="TERCIARIO_UNIVERSITARIO_INCOMPLETO">Terciario/Universitario Incompleto</option>
+                <option value="TERCIARIO_UNIVERSITARIO_COMPLETO">Terciario/Universitario Completo</option>
+            </select>
+        </div>
+        <div class="campo-modal">
+            <label>Título Obtenido</label>
+            <input type="text" id="hc-titulo" placeholder="Ej: Lic. en Administración">
+        </div>
+        <div class="campo-modal">
+            <label>Fecha aproximada de últimos chequeos médicos</label>
+            <input type="date" id="hc-chequeos">
+        </div>
+        <div class="campo-modal">
+            <label>¿Toma alguna medicación?</label>
+            <textarea id="hc-medicacion" placeholder="Nombre y dosis de la medicación, o 'No'..." style="min-height:60px;"></textarea>
+        </div>
+        <div class="campo-modal">
+            <label>¿Consultó con un psicólogo antes?</label>
+            <select id="hc-psicologo-antes">
+                <option value="">— Seleccionar —</option>
+                <option value="Si">Sí</option>
+                <option value="No">No</option>
+            </select>
+        </div>
+        <div class="campo-modal">
+            <label>Motivo de consulta anterior</label>
+            <textarea id="hc-motivo-anterior" placeholder="Describí el motivo de la consulta anterior..." style="min-height:60px;"></textarea>
+        </div>
+        <div class="campo-modal">
+            <label>¿Se atiende con otro profesional de la salud?</label>
+            <input type="text" id="hc-otro-profesional" placeholder="Ej: Psiquiatra, médico clínico... o No">
+        </div>
         <div class="modal-footer">
             <button class="btn-secundario" onclick="cerrarModal('modal-historia')">Cancelar</button>
             <button class="btn-primario" onclick="guardarHistoria()">Guardar</button>
@@ -957,7 +1082,7 @@
     let pacienteEditandoId = null;
 
     const token = localStorage.getItem('token');
-    if (!token) window.location.href = '/index.html';
+    if (!token) window.location.href = '/EDI/index.html';
 
     const headers = {
         'Content-Type': 'application/json',
@@ -966,7 +1091,7 @@
 
     async function init() {
         try {
-            const res = await fetch('/api/auth/me', { headers });
+            const res = await fetch('/EDI/api/auth/me', { headers });
             if (!res.ok) { logout(); return; }
             usuario = await res.json();
 
@@ -1027,15 +1152,15 @@
 
     async function cargarMisPacientes() {
         let url = usuario.rol === 'SUPERVISOR'
-            ? '/api/pacientes'
-            : `/api/pacientes/mis-pacientes?profesionalId=${usuario.id}`;
+            ? '/EDI/api/pacientes'
+            : `/EDI/api/pacientes/mis-pacientes?profesionalId=${usuario.id}`;
         const res = await fetch(url, { headers });
         todosPacientes = await res.json();
         renderizarPacientes(todosPacientes, 'tabla-mis-pacientes', 'mis-pacientes');
     }
 
     async function cargarTodosPacientes() {
-        const res = await fetch('/api/pacientes', { headers });
+        const res = await fetch('/EDI/api/pacientes', { headers });
         todosPacientes = await res.json();
         renderizarPacientes(todosPacientes, 'tabla-todos-pacientes', 'todos-pacientes');
     }
@@ -1062,7 +1187,7 @@
 
     async function eliminarPaciente(id) {
         if (!confirm('¿Seguro que querés eliminar este paciente? Esta acción no se puede deshacer.')) return;
-        const res = await fetch(`/api/pacientes/${id}`, { method: 'DELETE', headers });
+        const res = await fetch(`/EDI/api/pacientes/${id}`, { method: 'DELETE', headers });
         if (res.ok) {
             mostrarToast('Paciente eliminado', 'exito');
             cargarMisPacientes();
@@ -1073,7 +1198,7 @@
     }
 
     async function cargarMisIntervenciones() {
-        const res = await fetch(`/api/intervenciones/profesional/${usuario.id}`, { headers });
+        const res = await fetch(`/EDI/api/intervenciones/profesional/${usuario.id}`, { headers });
         const lista = await res.json();
         const contenedor = document.getElementById('lista-mis-intervenciones');
         if (!lista.length) {
@@ -1089,14 +1214,26 @@
     }
 
     async function cargarDetallePaciente(id) {
-        const resPac = await fetch(`/api/pacientes/${id}`, { headers });
+        const resPac = await fetch(`/EDI/api/pacientes/${id}`, { headers });
         const pac = await resPac.json();
         document.getElementById('detalle-nombre').textContent = pac.nombre + ' ' + pac.apellido;
-        document.getElementById('detalle-info').textContent = `DNI: ${pac.dni} | Tel: ${pac.telDeContacto || '—'} | ${pac.barrio || ''} ${pac.calle || ''} ${pac.numeroDeCasa || ''}`;
-
+    const partes = [
+        pac.dni ? `DNI: ${pac.dni}` : null,
+        pac.edad ? `Edad: ${pac.edad} años` : null,
+        pac.nacionalidad ? `Nacionalidad: ${pac.nacionalidad}` : null,
+        pac.telDeContacto ? `Tel: ${pac.telDeContacto}` : null,
+        pac.estadoCivil ? `Estado Civil: ${pac.estadoCivil}` : null,
+        pac.numeroDeHijos != null ? `Hijos: ${pac.numeroDeHijos}` : null,
+        pac.trabaja ? `Trabaja: ${pac.trabaja}` : null,
+        pac.ocupacion ? `Ocupación: ${pac.ocupacion}` : null,
+        [pac.localidad, pac.barrio, pac.calle, pac.numeroDeCasa].filter(Boolean).length
+            ? `Domicilio: ${[pac.localidad, pac.barrio, pac.calle, pac.numeroDeCasa].filter(Boolean).join(' ')}`
+            : null,
+    ];
+    document.getElementById('detalle-info').textContent = partes.filter(Boolean).join(' | ');
         // Profesionales asociados (solo SUPERVISOR)
         if (usuario.rol === 'SUPERVISOR') {
-            const resProf = await fetch(`/api/pacientes/${id}/profesionales`, { headers });
+            const resProf = await fetch(`/EDI/api/pacientes/${id}/profesionales`, { headers });
             const profs = await resProf.json();
             const historiaCard = document.getElementById('historia-card');
             const profCardExistente = document.getElementById('prof-asociados-card');
@@ -1126,20 +1263,59 @@
         }
 
         // Historia clínica
-        const resHC = await fetch(`/api/historias-clinicas/paciente/${id}`, { headers });
+        const resHC = await fetch(`/EDI/api/historias-clinicas/paciente/${id}`, { headers });
         if (resHC.ok) {
             const hc = await resHC.json();
+            window._hcActual = hc;
+
             document.getElementById('hc-acceso').textContent = hc.informacionDeAcceso || '—';
             document.getElementById('hc-socio').textContent = hc.datosSociodemograficos || '—';
             document.getElementById('hc-historia').textContent = hc.historiaClinica || '—';
+
+            const etiquetasSitLab = {
+                EN_RELACION_DE_DEPENDENCIA: 'En relación de dependencia',
+                MONOTRIBUTISTA: 'Monotributista',
+                TRABAJO_INFORMAL: 'Trabajo informal'
+            };
+            const etiquetasEduc = {
+                PRIMARIO_INCOMPLETO: 'Primario Incompleto',
+                PRIMARIO_COMPLETO: 'Primario Completo',
+                SECUNDARIO_INCOMPLETO: 'Secundario Incompleto',
+                SECUNDARIO_COMPLETO: 'Secundario Completo',
+                TERCIARIO_UNIVERSITARIO_INCOMPLETO: 'Terciario/Universitario Incompleto',
+                TERCIARIO_UNIVERSITARIO_COMPLETO: 'Terciario/Universitario Completo'
+            };
+
+            // ✅ FIX: usar hc.consultoConPsicologoAntes (sin zero-width space)
+            const camposExtra = [
+                ['Obra Social', hc.obraSocial],
+                ['Plan de Asistencia Social', hc.percibeplanAsistenciaSocial],
+                ['Situación Laboral', etiquetasSitLab[hc.situacionLaboral] || hc.situacionLaboral],
+                ['Nivel de Educación', etiquetasEduc[hc.nivelDeEducacion] || hc.nivelDeEducacion],
+                ['Título Obtenido', hc.tituloObtenido],
+                ['Últimos Chequeos Médicos', hc.fechaUltimosChequeosMedicos ? formatearFecha(hc.fechaUltimosChequeosMedicos) : null],
+                ['Medicación', hc.tomaAlgunaMedicacion],
+                ['Consultó con Psicólogo Antes', hc.consultoConPsicologoAntes],
+                ['Motivo Consulta Anterior', hc.motivoConsultaAnterior],
+                ['Atiende con Otro Profesional', hc.seAtiendeConOtroProfesionalDeLaSalud],
+            ].filter(([_, v]) => v);
+
+            const extrasDiv = document.getElementById('hc-campos-extra');
+            extrasDiv.innerHTML = camposExtra.map(([label, valor]) => `
+                <div class="historia-campo-titulo">${label}</div>
+                <div class="historia-campo-valor">${valor}</div>
+            `).join('');
+
         } else {
+            window._hcActual = {};
             document.getElementById('hc-acceso').textContent = 'Sin historia clínica cargada.';
             document.getElementById('hc-socio').textContent = '—';
             document.getElementById('hc-historia').textContent = '—';
+            document.getElementById('hc-campos-extra').innerHTML = '';
         }
 
         // Intervenciones
-        const resInt = await fetch(`/api/intervenciones/paciente/${id}`, { headers });
+        const resInt = await fetch(`/EDI/api/intervenciones/paciente/${id}`, { headers });
         const ints = await resInt.json();
         const contenedor = document.getElementById('lista-intervenciones-paciente');
         if (!ints.length) {
@@ -1155,7 +1331,7 @@
     }
 
     async function cargarTodosProfesionales() {
-        const res = await fetch('/api/profesionales', { headers });
+        const res = await fetch('/EDI/api/profesionales', { headers });
         todosProfesionales = await res.json();
         renderizarProfesionales(todosProfesionales);
     }
@@ -1204,8 +1380,8 @@
         cerrarSidebar();
         const select = document.getElementById('int-paciente');
         let url = usuario.rol === 'SUPERVISOR'
-            ? '/api/pacientes'
-            : `/api/pacientes/mis-pacientes?profesionalId=${usuario.id}`;
+            ? '/EDI/api/pacientes'
+            : `/EDI/api/pacientes/mis-pacientes?profesionalId=${usuario.id}`;
         const res = await fetch(url, { headers });
         const pacs = await res.json();
         select.innerHTML = pacs.map(p => `<option value="${p.id}">${p.nombre} ${p.apellido}</option>`).join('');
@@ -1215,9 +1391,21 @@
     }
 
     function abrirModalHistoria() {
-        document.getElementById('hc-acceso-input').value = document.getElementById('hc-acceso').textContent !== '—' ? document.getElementById('hc-acceso').textContent : '';
-        document.getElementById('hc-socio-input').value = document.getElementById('hc-socio').textContent !== '—' ? document.getElementById('hc-socio').textContent : '';
-        document.getElementById('hc-historia-input').value = document.getElementById('hc-historia').textContent !== '—' ? document.getElementById('hc-historia').textContent : '';
+        const hc = window._hcActual || {};
+        document.getElementById('hc-acceso-input').value = hc.informacionDeAcceso || '';
+        document.getElementById('hc-socio-input').value = hc.datosSociodemograficos || '';
+        document.getElementById('hc-historia-input').value = hc.historiaClinica || '';
+        document.getElementById('hc-obra-social').value = hc.obraSocial || '';
+        document.getElementById('hc-plan-social').value = hc.percibeplanAsistenciaSocial || '';
+        document.getElementById('hc-situacion-laboral').value = hc.situacionLaboral || '';
+        document.getElementById('hc-nivel-educacion').value = hc.nivelDeEducacion || '';
+        document.getElementById('hc-titulo').value = hc.tituloObtenido || '';
+        document.getElementById('hc-chequeos').value = hc.fechaUltimosChequeosMedicos || '';
+        document.getElementById('hc-medicacion').value = hc.tomaAlgunaMedicacion || '';
+        // ✅ FIX: usar hc.consultoConPsicologoAntes (sin zero-width space)
+        document.getElementById('hc-psicologo-antes').value = hc.consultoConPsicologoAntes || '';
+        document.getElementById('hc-motivo-anterior').value = hc.motivoConsultaAnterior || '';
+        document.getElementById('hc-otro-profesional').value = hc.seAtiendeConOtroProfesionalDeLaSalud || '';
         document.getElementById('modal-historia').classList.add('visible');
     }
 
@@ -1227,17 +1415,24 @@
     }
 
     async function abrirModalEditarPaciente(id) {
-        const res = await fetch(`/api/pacientes/${id}`, { headers });
+        const res = await fetch(`/EDI/api/pacientes/${id}`, { headers });
         if (!res.ok) { mostrarToast('Error al cargar el paciente', 'error'); return; }
         const p = await res.json();
         pacienteEditandoId = id;
         document.getElementById('edit-pac-nombre').value = p.nombre || '';
         document.getElementById('edit-pac-apellido').value = p.apellido || '';
         document.getElementById('edit-pac-dni').value = p.dni || '';
+        document.getElementById('edit-pac-edad').value = p.edad ?? '';
+        document.getElementById('edit-pac-nacionalidad').value = p.nacionalidad || '';
         document.getElementById('edit-pac-tel').value = p.telDeContacto || '';
+        document.getElementById('edit-pac-localidad').value = p.localidad || '';
         document.getElementById('edit-pac-barrio').value = p.barrio || '';
         document.getElementById('edit-pac-calle').value = p.calle || '';
         document.getElementById('edit-pac-numero').value = p.numeroDeCasa || '';
+        document.getElementById('edit-pac-estado-civil').value = p.estadoCivil || '';
+        document.getElementById('edit-pac-hijos').value = p.numeroDeHijos ?? '';
+        document.getElementById('edit-pac-trabaja').value = p.trabaja || '';
+        document.getElementById('edit-pac-ocupacion').value = p.ocupacion || '';
         document.getElementById('modal-editar-paciente').classList.add('visible');
     }
 
@@ -1250,24 +1445,33 @@
             nombre: document.getElementById('pac-nombre').value,
             apellido: document.getElementById('pac-apellido').value,
             dni: document.getElementById('pac-dni').value,
+            edad: document.getElementById('pac-edad').value ? parseInt(document.getElementById('pac-edad').value) : null,
+            nacionalidad: document.getElementById('pac-nacionalidad').value,
             telDeContacto: document.getElementById('pac-tel').value,
+            localidad: document.getElementById('pac-localidad').value,
             barrio: document.getElementById('pac-barrio').value,
             calle: document.getElementById('pac-calle').value,
             numeroDeCasa: document.getElementById('pac-numero').value,
+            estadoCivil: document.getElementById('pac-estado-civil').value,
+            numeroDeHijos: document.getElementById('pac-hijos').value ? parseInt(document.getElementById('pac-hijos').value) : null,
+            trabaja: document.getElementById('pac-trabaja').value,
+            ocupacion: document.getElementById('pac-ocupacion').value,
         };
 
-        const res = await fetch('/api/pacientes', { method: 'POST', headers, body: JSON.stringify(body) });
+        const res = await fetch('/EDI/api/pacientes', { method: 'POST', headers, body: JSON.stringify(body) });
         if (res.ok) {
             const pacienteCreado = await res.json();
             const hoy = new Date().toISOString().split('T')[0];
-            await fetch(`/api/intervenciones/paciente/${pacienteCreado.id}/profesional/${usuario.id}`, {
+            await fetch(`/EDI/api/intervenciones/paciente/${pacienteCreado.id}/profesional/${usuario.id}`, {
                 method: 'POST', headers,
                 body: JSON.stringify({ fechaDeIntervencion: hoy, intervencion: 'Inicio' })
             });
             cerrarModal('modal-paciente');
             mostrarToast('Paciente creado correctamente', 'exito');
-            ['pac-nombre','pac-apellido','pac-dni','pac-tel','pac-barrio','pac-calle','pac-numero']
+            ['pac-nombre','pac-apellido','pac-dni','pac-edad','pac-nacionalidad','pac-tel','pac-localidad',
+             'pac-barrio','pac-calle','pac-numero','pac-hijos','pac-ocupacion']
                 .forEach(id => document.getElementById(id).value = '');
+            ['pac-estado-civil','pac-trabaja'].forEach(id => document.getElementById(id).selectedIndex = 0);
             cargarMisPacientes();
         } else {
             mostrarToast('Error al guardar el paciente', 'error');
@@ -1279,12 +1483,19 @@
             nombre: document.getElementById('edit-pac-nombre').value,
             apellido: document.getElementById('edit-pac-apellido').value,
             dni: document.getElementById('edit-pac-dni').value,
+            edad: document.getElementById('edit-pac-edad').value ? parseInt(document.getElementById('edit-pac-edad').value) : null,
+            nacionalidad: document.getElementById('edit-pac-nacionalidad').value,
             telDeContacto: document.getElementById('edit-pac-tel').value,
+            localidad: document.getElementById('edit-pac-localidad').value,
             barrio: document.getElementById('edit-pac-barrio').value,
             calle: document.getElementById('edit-pac-calle').value,
             numeroDeCasa: document.getElementById('edit-pac-numero').value,
+            estadoCivil: document.getElementById('edit-pac-estado-civil').value,
+            numeroDeHijos: document.getElementById('edit-pac-hijos').value ? parseInt(document.getElementById('edit-pac-hijos').value) : null,
+            trabaja: document.getElementById('edit-pac-trabaja').value,
+            ocupacion: document.getElementById('edit-pac-ocupacion').value,
         };
-        const res = await fetch(`/api/pacientes/${pacienteEditandoId}`, { method: 'PUT', headers, body: JSON.stringify(body) });
+        const res = await fetch(`/EDI/api/pacientes/${pacienteEditandoId}`, { method: 'PUT', headers, body: JSON.stringify(body) });
         if (res.ok) {
             cerrarModal('modal-editar-paciente');
             mostrarToast('Paciente actualizado correctamente', 'exito');
@@ -1301,7 +1512,7 @@
             fechaDeIntervencion: document.getElementById('int-fecha').value,
             intervencion: document.getElementById('int-descripcion').value,
         };
-        const res = await fetch(`/api/intervenciones/paciente/${pacienteId}/profesional/${usuario.id}`, { method: 'POST', headers, body: JSON.stringify(body) });
+        const res = await fetch(`/EDI/api/intervenciones/paciente/${pacienteId}/profesional/${usuario.id}`, { method: 'POST', headers, body: JSON.stringify(body) });
         if (res.ok) {
             cerrarModal('modal-intervencion');
             mostrarToast('Intervención registrada correctamente', 'exito');
@@ -1318,10 +1529,21 @@
             informacionDeAcceso: document.getElementById('hc-acceso-input').value,
             datosSociodemograficos: document.getElementById('hc-socio-input').value,
             historiaClinica: document.getElementById('hc-historia-input').value,
+            obraSocial: document.getElementById('hc-obra-social').value,
+            percibeplanAsistenciaSocial: document.getElementById('hc-plan-social').value,
+            situacionLaboral: document.getElementById('hc-situacion-laboral').value || null,
+            nivelDeEducacion: document.getElementById('hc-nivel-educacion').value || null,
+            tituloObtenido: document.getElementById('hc-titulo').value,
+            fechaUltimosChequeosMedicos: document.getElementById('hc-chequeos').value || null,
+            tomaAlgunaMedicacion: document.getElementById('hc-medicacion').value,
+            // ✅ FIX: nombre correcto sin zero-width space, coincide con el campo Java
+            consultoConPsicologoAntes: document.getElementById('hc-psicologo-antes').value,
+            motivoConsultaAnterior: document.getElementById('hc-motivo-anterior').value,
+            seAtiendeConOtroProfesionalDeLaSalud: document.getElementById('hc-otro-profesional').value,
         };
-        let res = await fetch(`/api/historias-clinicas/paciente/${pacienteActualId}`, { method: 'PUT', headers, body: JSON.stringify(body) });
+        let res = await fetch(`/EDI/api/historias-clinicas/paciente/${pacienteActualId}`, { method: 'PUT', headers, body: JSON.stringify(body) });
         if (res.status === 404) {
-            res = await fetch(`/api/historias-clinicas/paciente/${pacienteActualId}`, { method: 'POST', headers, body: JSON.stringify(body) });
+            res = await fetch(`/EDI/api/historias-clinicas/paciente/${pacienteActualId}`, { method: 'POST', headers, body: JSON.stringify(body) });
         }
         if (res.ok) {
             cerrarModal('modal-historia');
@@ -1343,7 +1565,7 @@
             telDeContacto: document.getElementById('prof-tel').value,
             rol: document.getElementById('prof-rol').value,
         };
-        const res = await fetch('/api/profesionales', { method: 'POST', headers, body: JSON.stringify(body) });
+        const res = await fetch('/EDI/api/profesionales', { method: 'POST', headers, body: JSON.stringify(body) });
         if (res.ok) {
             cerrarModal('modal-profesional');
             mostrarToast('Profesional creado correctamente', 'exito');
@@ -1355,7 +1577,7 @@
 
     async function eliminarProfesional(id) {
         if (!confirm('¿Seguro que querés eliminar este profesional?')) return;
-        const res = await fetch(`/api/profesionales/${id}`, { method: 'DELETE', headers });
+        const res = await fetch(`/EDI/api/profesionales/${id}`, { method: 'DELETE', headers });
         if (res.ok) {
             mostrarToast('Profesional eliminado', 'exito');
             cargarTodosProfesionales();
@@ -1379,7 +1601,7 @@
 
     function logout() {
         localStorage.clear();
-        window.location.href = '/index.html';
+        window.location.href = '/EDI/index.html';
     }
 
     document.addEventListener('keydown', e => {
@@ -1388,6 +1610,183 @@
         }
     });
 
+
+async function descargarPacienteDocx() {
+    const { Document, Packer, Paragraph, TextRun, HeadingLevel } = window.docx;
+
+    const resPac = await fetch(`/EDI/api/pacientes/${pacienteActualId}`, { headers });
+    const pac = await resPac.json();
+    // Obtener el profesional real que atiende al paciente
+    const resProf = await fetch(`/EDI/api/pacientes/${pacienteActualId}/profesionales`, { headers });
+    const profs = resProf.ok ? await resProf.json() : [];
+    const profesional = profs.length ? profs[0] : usuario;
+    const resHC = await fetch(`/EDI/api/historias-clinicas/paciente/${pacienteActualId}`, { headers });
+    const hc = resHC.ok ? await resHC.json() : null;
+
+    const resInt = await fetch(`/EDI/api/intervenciones/paciente/${pacienteActualId}`, { headers });
+    const ints = resInt.ok ? await resInt.json() : [];
+
+    const etiquetasSitLab = {
+        EN_RELACION_DE_DEPENDENCIA: 'En relación de dependencia',
+        MONOTRIBUTISTA: 'Monotributista',
+        TRABAJO_INFORMAL: 'Trabajo informal'
+    };
+    const etiquetasEduc = {
+        PRIMARIO_INCOMPLETO: 'Primario Incompleto',
+        PRIMARIO_COMPLETO: 'Primario Completo',
+        SECUNDARIO_INCOMPLETO: 'Secundario Incompleto',
+        SECUNDARIO_COMPLETO: 'Secundario Completo',
+        TERCIARIO_UNIVERSITARIO_INCOMPLETO: 'Terciario/Universitario Incompleto',
+        TERCIARIO_UNIVERSITARIO_COMPLETO: 'Terciario/Universitario Completo'
+    };
+
+    const campo = (label, valor) => valor ? new Paragraph({
+        children: [
+            new TextRun({ text: label + ': ', bold: true }),
+            new TextRun({ text: valor })
+        ],
+        spacing: { after: 100 }
+    }) : null;
+
+    const titulo = (texto) => new Paragraph({
+        text: texto,
+        heading: HeadingLevel.HEADING_2,
+        spacing: { before: 300, after: 150 }
+    });
+
+    const separador = () => new Paragraph({ text: '', spacing: { after: 100 } });
+
+    const seccionPersonal = [
+        titulo('Datos Personales'),
+        campo('Nombre', pac.nombre + ' ' + pac.apellido),
+        campo('DNI', pac.dni),
+        campo('Edad', pac.edad ? pac.edad + ' años' : null),
+        campo('Nacionalidad', pac.nacionalidad),
+        campo('Teléfono', pac.telDeContacto),
+        campo('Estado Civil', pac.estadoCivil),
+        campo('Hijos', pac.numeroDeHijos != null ? String(pac.numeroDeHijos) : null),
+        campo('Trabaja', pac.trabaja),
+        campo('Ocupación', pac.ocupacion),
+        campo('Domicilio', [pac.localidad, pac.barrio, pac.calle, pac.numeroDeCasa].filter(Boolean).join(' ')),
+        separador(),
+    ].filter(Boolean);
+
+    const seccionHC = hc ? [
+        titulo('Historia Clínica'),
+        campo('Información de Acceso', hc.informacionDeAcceso),
+        campo('Datos Sociodemográficos', hc.datosSociodemograficos),
+        campo('Historia Clínica', hc.historiaClinica),
+        campo('Obra Social', hc.obraSocial),
+        campo('Plan de Asistencia Social', hc.percibeplanAsistenciaSocial),
+        campo('Situación Laboral', etiquetasSitLab[hc.situacionLaboral] || hc.situacionLaboral),
+        campo('Nivel de Educación', etiquetasEduc[hc.nivelDeEducacion] || hc.nivelDeEducacion),
+        campo('Título Obtenido', hc.tituloObtenido),
+        campo('Últimos Chequeos Médicos', hc.fechaUltimosChequeosMedicos ? formatearFecha(hc.fechaUltimosChequeosMedicos) : null),
+        campo('Medicación', hc.tomaAlgunaMedicacion),
+        campo('Consultó con Psicólogo Antes', hc.consultoConPsicologoAntes),
+        campo('Motivo Consulta Anterior', hc.motivoConsultaAnterior),
+        campo('Atiende con Otro Profesional', hc.seAtiendeConOtroProfesionalDeLaSalud),
+        separador(),
+    ].filter(Boolean) : [];
+
+    const seccionInt = [
+        titulo('Intervenciones'),
+        ...ints.length ? ints.flatMap(i => [
+            new Paragraph({
+                children: [new TextRun({ text: formatearFecha(i.fechaDeIntervencion), bold: true, color: 'E8560A' })],
+                spacing: { before: 150, after: 60 }
+            }),
+            new Paragraph({ text: i.intervencion, spacing: { after: 100 } })
+        ]) : [new Paragraph({ text: 'Sin intervenciones registradas.' })]
+    ];
+
+   const doc = new Document({
+    sections: [{
+        children: [
+            new Paragraph({
+                text: pac.nombre + ' ' + pac.apellido,
+                heading: HeadingLevel.HEADING_1,
+                spacing: { after: 100 }
+            }),
+            new Paragraph({
+                children: [
+                    new TextRun({ text: 'Profesional a cargo: ', bold: true }),
+                    new TextRun({ text: profesional.nombre + ' ' + profesional.apellido }),
+                ],
+                spacing: { after: 60 }
+            }),
+            new Paragraph({
+                children: [
+                    new TextRun({ text: 'Matrícula: ', bold: true }),
+                    new TextRun({ text: profesional.matricula || '—' }),
+                ],
+                spacing: { after: 60 }
+            }),
+            new Paragraph({
+                children: [
+                    new TextRun({ text: 'Especialidad: ', bold: true }),
+                    new TextRun({ text: profesional.especialidad || '—' }),
+                ],
+                spacing: { after: 200 }
+            }),
+            ...seccionPersonal,
+            ...seccionHC,
+            ...seccionInt
+        ]
+    }]
+});
+
+    const blob = await Packer.toBlob(doc);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${pac.apellido}_${pac.nombre}.docx`;
+    a.click();
+    URL.revokeObjectURL(url);
+    mostrarToast('Documento descargado', 'exito');
+}
+
+async function descargarTodosDocx() {
+    const { Document, Packer, Paragraph, TextRun, HeadingLevel } = docx;
+
+    const url = usuario.rol === 'SUPERVISOR'
+        ? '/EDI/api/pacientes'
+        : `/EDI/api/pacientes/mis-pacientes?profesionalId=${usuario.id}`;
+    const res = await fetch(url, { headers });
+    const lista = await res.json();
+
+    const filas = lista.map(p => new Paragraph({
+        children: [
+            new TextRun({ text: p.nombre + ' ' + p.apellido, bold: true }),
+            new TextRun({ text: `  |  DNI: ${p.dni}  |  Tel: ${p.telDeContacto || '—'}  |  ${[p.localidad, p.barrio].filter(Boolean).join(', ')}` })
+        ],
+        spacing: { after: 120 }
+    }));
+
+    const doc = new Document({
+        sections: [{
+            children: [
+                new Paragraph({
+                    text: 'Lista de Pacientes',
+                    heading: HeadingLevel.HEADING_1,
+                    spacing: { after: 300 }
+                }),
+                new Paragraph({
+                    text: `Total: ${lista.length} pacientes`,
+                    spacing: { after: 300 }
+                }),
+                ...filas
+            ]
+        }]
+    });
+
+    const blob = await Packer.toBlob(doc);
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `pacientes_${new Date().toISOString().split('T')[0]}.docx`;
+    a.click();
+    mostrarToast('Lista exportada', 'exito');
+}
     init();
 </script>
 </body>

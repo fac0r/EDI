@@ -30,7 +30,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Archivos estáticos públicos
                         .requestMatchers("/", "/index.html", "/dashboard.html", "/*.css", "/*.js", "/assets/**").permitAll()
-                        .requestMatchers("/", "/index.html", "/dashboard.html", "/*.css", "/*.js", "/assets/**").permitAll()
+                        .requestMatchers("/manifest.json", "/sw.js", "/icons/**").permitAll()
                         // Login público
                         .requestMatchers("/api/auth/**").permitAll()
                         // Solo SUPERVISOR puede gestionar profesionales
@@ -40,7 +40,6 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/pacientes/**").hasRole("SUPERVISOR")
                         // Todo lo demás requiere estar autenticado
                         .anyRequest().authenticated()
-
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 

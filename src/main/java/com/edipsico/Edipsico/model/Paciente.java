@@ -36,6 +36,27 @@ public class Paciente {
     @Column(name = "tel_de_contacto")
     private String telDeContacto;
 
+    // --- CAMPOS NUEVOS ---
+
+    private String nacionalidad;
+
+    private Integer edad;
+
+    private String localidad;
+
+    @Column(name = "estado_civil")
+    private String estadoCivil;
+
+    @Column(name = "numero_de_hijos")
+    private Integer numeroDeHijos;
+
+    /** Valores esperados: "Si" / "No" */
+    private String trabaja;
+
+    private String ocupacion;
+
+    // --- FIN CAMPOS NUEVOS ---
+
     @JsonManagedReference("paciente-historia")
     @OneToOne(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private HistoriaClinica historiaClinica;

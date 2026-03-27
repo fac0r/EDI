@@ -39,6 +39,18 @@ public class HistoriaClinicaService {
         historia.setDatosSociodemograficos(historiaActualizada.getDatosSociodemograficos());
         historia.setHistoriaClinica(historiaActualizada.getHistoriaClinica());
 
+        // Campos nuevos
+        historia.setObraSocial(historiaActualizada.getObraSocial());
+        historia.setPercibeplanAsistenciaSocial(historiaActualizada.getPercibeplanAsistenciaSocial());
+        historia.setSituacionLaboral(historiaActualizada.getSituacionLaboral());
+        historia.setNivelDeEducacion(historiaActualizada.getNivelDeEducacion());
+        historia.setTituloObtenido(historiaActualizada.getTituloObtenido());
+        historia.setFechaUltimosChequeosMedicos(historiaActualizada.getFechaUltimosChequeosMedicos());
+        historia.setTomaAlgunaMedicacion(historiaActualizada.getTomaAlgunaMedicacion());
+        historia.setConsultoConPsicologoAntes(historiaActualizada.getConsultoConPsicologoAntes());
+        historia.setMotivoConsultaAnterior(historiaActualizada.getMotivoConsultaAnterior());
+        historia.setSeAtiendeConOtroProfesionalDeLaSalud(historiaActualizada.getSeAtiendeConOtroProfesionalDeLaSalud());
+
         return historiaClinicaRepository.save(historia);
     }
 }

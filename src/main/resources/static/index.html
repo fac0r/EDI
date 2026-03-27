@@ -518,7 +518,7 @@
         errorMsg.classList.remove('visible');
 
         try {
-            const response = await fetch('/api/auth/login', {
+            const response = await fetch('/EDI/api/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password })
@@ -531,7 +531,7 @@
                 localStorage.setItem('rol', data.rol);
                 localStorage.setItem('nombre', data.nombre);
                 localStorage.setItem('apellido', data.apellido);
-                window.location.href = '/dashboard.html';
+                window.location.href = '/EDI/dashboard.html';
             } else {
                 errorMsg.textContent = data.error || 'Credenciales inválidas.';
                 errorMsg.classList.add('visible');
@@ -550,6 +550,10 @@
         if (e.key === 'Enter') login();
     });
 </script>
-
+<script>
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/EDI/sw.js');
+    }
+</script>
 </body>
 </html>
