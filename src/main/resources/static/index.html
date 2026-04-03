@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="/EDI/manifest.json">
     <title>EdiPsico — Acceso</title>
     <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;600;700;900&family=Barlow+Condensed:wght@700;900&display=swap" rel="stylesheet">
     <style>
@@ -421,6 +422,27 @@
             .mobile-header { display: flex; }
             .form-header { margin-bottom: 24px; }
         }
+
+        .btn-instalar {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--azul);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-family: 'Barlow', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+    z-index: 999;
+    transition: background 0.2s;
+}
+.btn-instalar:hover { background: var(--azul-oscuro); }
     </style>
 </head>
 <body>
@@ -429,7 +451,7 @@
 <div class="panel-izq">
     <div class="logo-wrap">
         <div class="logo-icon">EP</div>
-        <div class="logo-texto">EDI <span>PSICO</span></div>
+        <div class="logo-texto">PSICO <span>EN ACCIÓN</span></div>
     </div>
 
 
@@ -450,7 +472,7 @@
         <div class="mobile-header">
             <div class="mobile-logo">
                 <div class="mobile-logo-icon">EP</div>
-                <div class="mobile-logo-texto">EDI <span>PSICO</span></div>
+                <div class="mobile-logo-texto">PSICO <span>EN ACCIÓN</span></div>
             </div>
             <div class="mobile-subtitulo">Sistema de Gestión Clínica · UBA Psicología</div>
         </div>
@@ -549,11 +571,45 @@
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') login();
     });
+
+
 </script>
 <script>
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/EDI/sw.js');
     }
+
+
+ let deferredPrompt;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    const btn = document.getElementById('btnInstalar');
+    if (btn) btn.style.display = 'flex';
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    const btn = document.getElementById('btnInstalar');
+    if (!btn) return;
+
+    btn.addEventListener('click', async () => {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        deferredPrompt = null;
+        btn.style.display = 'none';
+    });
+});
+
+window.addEventListener('appinstalled', () => {
+    const btn = document.getElementById('btnInstalar');
+    if (btn) btn.style.display = 'none';
+});
 </script>
+
+<button class="btn-instalar" id="btnInstalar">
+    ⬇️ Instalar app
+</button>
 </body>
 </html>

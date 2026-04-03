@@ -30,7 +30,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Archivos estáticos públicos
                         .requestMatchers("/", "/index.html", "/dashboard.html", "/*.css", "/*.js", "/assets/**").permitAll()
-                        .requestMatchers("/manifest.json", "/sw.js", "/icons/**").permitAll()
+                        .requestMatchers("/manifest.json", "/EDI/manifest.json", "/sw.js", "/EDI/sw.js", "/icons/**", "/EDI/icons/**").permitAll()
                         // Login público
                         .requestMatchers("/api/auth/**").permitAll()
                         // Solo SUPERVISOR puede gestionar profesionales
