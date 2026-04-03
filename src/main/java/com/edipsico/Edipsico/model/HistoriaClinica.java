@@ -11,7 +11,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "HistoriaClinica")
+@Table(name = "historia_clinica")
 public class HistoriaClinica {
 
     // --- ENUMs internos ---
@@ -31,7 +31,7 @@ public class HistoriaClinica {
         TERCIARIO_UNIVERSITARIO_COMPLETO
     }
 
-    // --- CAMPOS EXISTENTES ---
+    // --- IDENTIFICACIÓN ---
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,21 +42,37 @@ public class HistoriaClinica {
     @JoinColumn(name = "paciente_id", nullable = false, unique = true)
     private Paciente paciente;
 
-    @Column(name = "informacion_de_acceso", columnDefinition = "TEXT")
-    private String informacionDeAcceso;
+    // --- DATOS DE CONTACTO Y SOCIODEMOGRÁFICOS ---
 
-    @Column(name = "datos_sociodemograficos", columnDefinition = "TEXT")
-    private String datosSociodemograficos;
+    @Column(name = "localidad_barrio")
+    private String localidadBarrio;
 
-    @Column(name = "historia_clinica", columnDefinition = "TEXT")
-    private String historiaClinica;
+    @Column(name = "tel_de_contacto")
+    private String telDeContacto;
 
-    // --- CAMPOS NUEVOS ---
+    private String nacionalidad;
+
+    @Column(name = "fecha_de_nacimiento")
+    private LocalDate fechaDeNacimiento;
+
+    private Integer edad;
+
+    @Column(name = "estado_civil")
+    private String estadoCivil;
+
+    @Column(name = "numero_de_hijos")
+    private Integer numeroDeHijos;
+
+    /** Valores esperados: "Si" / "No" */
+    private String trabaja;
+
+    private String ocupacion;
+
+    // --- DATOS DE SALUD Y COBERTURA ---
 
     @Column(name = "obra_social")
     private String obraSocial;
 
-    /** Valores esperados: "Si" / "No" */
     @Column(name = "percibe_plan_asistencia_social")
     private String percibeplanAsistenciaSocial;
 
@@ -72,7 +88,7 @@ public class HistoriaClinica {
     private String tituloObtenido;
 
     @Column(name = "fecha_ultimos_chequeos_medicos")
-    private LocalDate fechaUltimosChequeosMedicos;
+    private String fechaUltimosChequeosMedicos;
 
     @Column(name = "toma_alguna_medicacion", columnDefinition = "TEXT")
     private String tomaAlgunaMedicacion;
@@ -86,5 +102,15 @@ public class HistoriaClinica {
     @Column(name = "se_atiende_con_otro_profesional")
     private String seAtiendeConOtroProfesionalDeLaSalud;
 
-    // --- FIN CAMPOS NUEVOS ---
+    // --- DATOS DE CONSULTA EN PSICOENACCIÓN ---
+
+    @Column(name = "dispositivo_lugar")
+    private String dispositivoLugar;
+
+    @Column(name = "motivo_consulta_psicoenaccion")
+    private String motivoConsultaPsicoenaccion;
+
+    @Column(name = "breve_resena_del_caso", columnDefinition = "TEXT")
+    private String breveResenaDelCaso;
+
 }

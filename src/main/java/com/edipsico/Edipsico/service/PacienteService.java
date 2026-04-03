@@ -42,19 +42,6 @@ public class PacienteService {
         paciente.setNombre(pacienteActualizado.getNombre());
         paciente.setApellido(pacienteActualizado.getApellido());
         paciente.setDni(pacienteActualizado.getDni());
-        paciente.setBarrio(pacienteActualizado.getBarrio());
-        paciente.setCalle(pacienteActualizado.getCalle());
-        paciente.setNumeroDeCasa(pacienteActualizado.getNumeroDeCasa());
-        paciente.setTelDeContacto(pacienteActualizado.getTelDeContacto());
-
-        // Campos nuevos
-        paciente.setNacionalidad(pacienteActualizado.getNacionalidad());
-        paciente.setEdad(pacienteActualizado.getEdad());
-        paciente.setLocalidad(pacienteActualizado.getLocalidad());
-        paciente.setEstadoCivil(pacienteActualizado.getEstadoCivil());
-        paciente.setNumeroDeHijos(pacienteActualizado.getNumeroDeHijos());
-        paciente.setTrabaja(pacienteActualizado.getTrabaja());
-        paciente.setOcupacion(pacienteActualizado.getOcupacion());
 
         return pacienteRepository.save(paciente);
     }

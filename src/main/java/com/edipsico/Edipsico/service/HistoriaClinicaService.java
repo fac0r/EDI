@@ -35,11 +35,18 @@ public class HistoriaClinicaService {
         HistoriaClinica historia = historiaClinicaRepository.findByPacienteId(pacienteId)
                 .orElseThrow(() -> new RuntimeException("Historia clínica no encontrada para paciente id: " + pacienteId));
 
-        historia.setInformacionDeAcceso(historiaActualizada.getInformacionDeAcceso());
-        historia.setDatosSociodemograficos(historiaActualizada.getDatosSociodemograficos());
-        historia.setHistoriaClinica(historiaActualizada.getHistoriaClinica());
+        // Datos de contacto y sociodemográficos
+        historia.setLocalidadBarrio(historiaActualizada.getLocalidadBarrio());
+        historia.setTelDeContacto(historiaActualizada.getTelDeContacto());
+        historia.setNacionalidad(historiaActualizada.getNacionalidad());
+        historia.setFechaDeNacimiento(historiaActualizada.getFechaDeNacimiento());
+        historia.setEdad(historiaActualizada.getEdad());
+        historia.setEstadoCivil(historiaActualizada.getEstadoCivil());
+        historia.setNumeroDeHijos(historiaActualizada.getNumeroDeHijos());
+        historia.setTrabaja(historiaActualizada.getTrabaja());
+        historia.setOcupacion(historiaActualizada.getOcupacion());
 
-        // Campos nuevos
+        // Datos de salud y cobertura
         historia.setObraSocial(historiaActualizada.getObraSocial());
         historia.setPercibeplanAsistenciaSocial(historiaActualizada.getPercibeplanAsistenciaSocial());
         historia.setSituacionLaboral(historiaActualizada.getSituacionLaboral());
@@ -50,6 +57,11 @@ public class HistoriaClinicaService {
         historia.setConsultoConPsicologoAntes(historiaActualizada.getConsultoConPsicologoAntes());
         historia.setMotivoConsultaAnterior(historiaActualizada.getMotivoConsultaAnterior());
         historia.setSeAtiendeConOtroProfesionalDeLaSalud(historiaActualizada.getSeAtiendeConOtroProfesionalDeLaSalud());
+
+        // Datos de consulta en PsicoEnAcción
+        historia.setDispositivoLugar(historiaActualizada.getDispositivoLugar());
+        historia.setMotivoConsultaPsicoenaccion(historiaActualizada.getMotivoConsultaPsicoenaccion());
+        historia.setBreveResenaDelCaso(historiaActualizada.getBreveResenaDelCaso());
 
         return historiaClinicaRepository.save(historia);
     }

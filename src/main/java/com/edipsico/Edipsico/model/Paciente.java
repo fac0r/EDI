@@ -6,12 +6,11 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "Paciente")
+@Table(name = "paciente")
 public class Paciente {
 
     @Id
@@ -27,36 +26,6 @@ public class Paciente {
     @Column(nullable = false, unique = true)
     private String dni;
 
-    private String barrio;
-    private String calle;
-
-    @Column(name = "numero_de_casa")
-    private String numeroDeCasa;
-
-    @Column(name = "tel_de_contacto")
-    private String telDeContacto;
-
-    // --- CAMPOS NUEVOS ---
-
-    private String nacionalidad;
-
-    private Integer edad;
-
-    private String localidad;
-
-    @Column(name = "estado_civil")
-    private String estadoCivil;
-
-    @Column(name = "numero_de_hijos")
-    private Integer numeroDeHijos;
-
-    /** Valores esperados: "Si" / "No" */
-    private String trabaja;
-
-    private String ocupacion;
-
-    // --- FIN CAMPOS NUEVOS ---
-
     @JsonManagedReference("paciente-historia")
     @OneToOne(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private HistoriaClinica historiaClinica;
@@ -64,6 +33,5 @@ public class Paciente {
     @JsonManagedReference("paciente-intervenciones")
     @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private java.util.List<Intervencion> intervenciones;
-
 
 }
