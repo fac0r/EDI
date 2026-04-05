@@ -634,6 +634,10 @@
                 document.getElementById('seccion-supervisor').style.display = 'block';
             }
 
+             // Entrada "trampa" base
+            history.pushState({ seccion: 'mis-pacientes' }, '', '#mis-pacientes');
+            // Entrada real encima
+            history.pushState({ seccion: 'mis-pacientes' }, '', '#mis-pacientes');
             cargarMisPacientes();
         } catch(e) { logout(); }
     }
@@ -664,20 +668,26 @@
         if (btn) btn.classList.add('active');
         cerrarSidebar();
 
+        history.pushState({ seccion: nombre }, '', '#' + nombre);
+
+
         if (nombre === 'mis-pacientes') cargarMisPacientes();
         if (nombre === 'mis-intervenciones') cargarMisIntervenciones();
         if (nombre === 'todos-pacientes') cargarTodosPacientes();
         if (nombre === 'todos-profesionales') cargarTodosProfesionales();
     }
 
-    function mostrarDetallePaciente(pacienteId, desde) {
-        seccionAnterior = desde;
-        pacienteActualId = pacienteId;
-        document.querySelectorAll('.seccion').forEach(s => s.classList.remove('activa'));
-        document.getElementById('sec-detalle-paciente').classList.add('activa');
-        cerrarSidebar();
-        cargarDetallePaciente(pacienteId);
-    }
+   function mostrarDetallePaciente(pacienteId, desde) {
+    seccionAnterior = desde;
+    pacienteActualId = pacienteId;
+    document.querySelectorAll('.seccion').forEach(s => s.classList.remove('activa'));
+    document.getElementById('sec-detalle-paciente').classList.add('activa');
+    cerrarSidebar();
+
+    history.pushState({ seccion: 'detalle-paciente', pacienteId, desde }, '', '#detalle-' + pacienteId);
+
+    cargarDetallePaciente(pacienteId);
+}
 
     function volverAntesDetalle() {
         mostrarSeccion(seccionAnterior);
@@ -1417,6 +1427,16 @@
         }
     });
 
+window.addEventListener('popstate', (e) => {
+
+
+    if (!e.state) return;
+    if (e.state.seccion === 'detalle-paciente') {
+        mostrarDetallePaciente(e.state.pacienteId, e.state.desde);
+    } else {
+        mostrarSeccion(e.state.seccion);
+    }
+});
     init();
 </script>
 </body>
